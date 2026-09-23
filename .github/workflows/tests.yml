@@ -65,6 +65,56 @@ jobs:
       - name: Run shellcheck
         run: make lint
 
+      - name: Validate workflow syntax
+        uses: docker://rhysd/actionlint:latest
+        with:
+          args: -color
+
+      - name: Check shebang lines
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            head -1 "$f" | grep -q '^#!/usr/bin/env bash' || { echo "FAIL: $f missing shebang"; fail=1; }
+          done < <(find src -name "*.sh" | sort)
+          exit $fail
+
+      - name: Check source guards are reset between tests
+        run: |
+          guards=$(grep -rhoE '^_[A-Z_]+_LOADED=1' src/ | sed 's/=1$//' | sort -u)
+          if [[ -z "$guards" ]]; then exit 0; fi
+          unsets=$(grep -rhoE 'unset _[A-Z_]+_LOADED' test/ | sed 's/^unset //' | sort -u)
+          missing=$(comm -23 <(echo "$guards") <(echo "$unsets"))
+          if [[ -n "$missing" ]]; then
+            echo "Source guards never unset in the test helpers:"
+            echo "$missing"
+            exit 1
+          fi
+
+      - name: Check file sizes
+        run: |
+          fail=0
+          allow=.github/file-size-allowlist
+          while IFS= read -r f; do
+            lines=$(wc -l < "$f")
+            max=500
+            if [[ -f "$allow" ]]; then
+              entry=$(grep -E "^${f}[[:space:]]" "$allow" || true)
+              if [[ -n "$entry" ]]; then max=$(echo "$entry" | awk '{print $2}'); fi
+            fi
+            if (( lines > max )); then
+              echo "FAIL: $f has $lines lines (max $max)"
+              fail=1
+            fi
+          done < <(find src -name "*.sh" | sort)
+          exit $fail
+
+      - name: Check every option appears in the docs
+        run: |
+          slug=$(basename "$PWD" | sed 's/^tmux-//; s/-revamped$//')
+          while IFS= read -r opt; do
+            grep -q -- "$opt" README.md 2>/dev/null || echo "WARN: $opt is not documented in README.md"
+          done < <(grep -rhoE "@${slug}_revamped_[a-z_]+" src/ | sort -u)
+
   coverage:
     runs-on: ubuntu-latest
     steps:
