@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, master]
 
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
 jobs:
   test:
     strategy:
