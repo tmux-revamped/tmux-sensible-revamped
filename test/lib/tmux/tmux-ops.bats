@@ -40,3 +40,64 @@ teardown() {
   unset_tmux_option @foo
   [[ -z "$(get_tmux_option @foo)" ]]
 }
+
+@test "tmux-ops.sh - the window and pane helpers are defined" {
+  function_exists get_window_option
+  function_exists get_pane_option
+  function_exists set_window_option
+  function_exists set_pane_option
+}
+
+@test "tmux-ops.sh - the geometry helpers are defined" {
+  function_exists get_current_pane
+  function_exists get_current_window
+  function_exists get_pane_count
+  function_exists get_pane_width
+  function_exists get_pane_height
+  function_exists get_window_width
+  function_exists get_window_height
+  function_exists get_window_panes
+}
+
+@test "tmux-ops.sh - a window option round-trips and falls back" {
+  [[ "$(get_window_option @win fallback)" == "fallback" ]]
+  set_window_option @win value
+
+  [[ "$(get_window_option @win)" == "value" ]]
+}
+
+@test "tmux-ops.sh - a pane option round-trips with and without a target" {
+  [[ "$(get_pane_option @pane fallback)" == "fallback" ]]
+  set_pane_option @pane value
+  [[ "$(get_pane_option @pane)" == "value" ]]
+
+  set_pane_option @pane other "%1"
+  [[ -n "$(get_pane_option @pane '' '%1')" ]]
+}
+
+@test "tmux-ops.sh - every geometry helper runs" {
+  run get_current_pane
+  [[ "${status}" -eq 0 ]]
+  run get_current_window
+  [[ "${status}" -eq 0 ]]
+  run get_pane_count
+  [[ "${status}" -eq 0 ]]
+  run get_pane_width
+  [[ "${status}" -eq 0 ]]
+  run get_pane_height
+  [[ "${status}" -eq 0 ]]
+  run get_window_width
+  [[ "${status}" -eq 0 ]]
+  run get_window_height
+  [[ "${status}" -eq 0 ]]
+  run get_window_panes
+  [[ "${status}" -eq 0 ]]
+}
+
+@test "tmux-ops.sh - the pane geometry helpers accept a target" {
+  run get_pane_width "%1"
+  [[ "${status}" -eq 0 ]]
+
+  run get_pane_height "%1"
+  [[ "${status}" -eq 0 ]]
+}
