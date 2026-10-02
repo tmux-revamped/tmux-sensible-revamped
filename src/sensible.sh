@@ -120,7 +120,7 @@ _apply_copy_bindings() {
 
 # apply_sensible -> the full normalization pass.
 apply_sensible() {
-  local ver os dt mk clip conf prefix prefix_letter iterm=0
+  local ver os dt mk clip prefix prefix_letter iterm=0
   local tc=0 has_direct=0 has_256=0
   ver="$(tmux_version)"
   os="$(current_os)"
@@ -256,6 +256,12 @@ apply_sensible() {
       _emit bind-key "${prefix}" send-prefix
     fi
   fi
+  _apply_convenience_keys "${prefix_letter}"
+}
+
+_apply_convenience_keys() {
+  local prefix_letter="${1}" conf
+  [[ "$(_get_option @sensible_revamped_keys)" == "off" ]] && return 0
   if [[ -n "${prefix_letter}" ]] && _key_unbound "${prefix_letter}"; then
     _emit bind-key "${prefix_letter}" last-window
   fi
@@ -265,12 +271,11 @@ apply_sensible() {
   if _key_unbound C-n; then
     _emit bind-key C-n next-window
   fi
-
-  # Reload binding, only when R is free.
   if _key_unbound R; then
     conf="$(_config_path)"
     _emit bind-key R source-file "${conf}" ";" display-message "tmux-sensible-revamped: reloaded"
   fi
+  return 0
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `@sensible_revamped_keys`. Setting it to `off` skips the `R` reload, the
+  prefix-letter last-window, `C-p`, and `C-n`. Each was bound only while free,
+  but a key is free only when this plugin loads, so a plugin loaded after it
+  could still claim the same key and leave two bindings competing for it.
+
 ## [1.1.0] - 2026-06-30
 
 ### Added

@@ -42,7 +42,7 @@ Options above your tmux version are skipped silently. The minimum is tmux 1.9, t
 | Window and pane | `base-index 1`, `pane-base-index 1`, `renumber-windows on`, `automatic-rename on`, `aggressive-resize on` for normal clients, off under iTerm2 control mode | 1.6 and 1.7 where noted |
 | Copy mode | `mode-keys` from `$EDITOR`, version-gated system-clipboard yank and mouse-drag bindings (`copy-pipe-and-cancel` on 2.4+, the `vi-copy`/`emacs-copy` tables below), vi selection keys (`v`, `C-v`, `Enter`), and path-friendly `word-separators` | any |
 
-It also carries over every default binding from upstream tmux-sensible, each set only when the key is still free: `prefix + R` reloads the config resolving the path in XDG order, the prefix letter switches to the last window, `C-p` and `C-n` move between windows, and `send-prefix` is wired when the prefix is not `C-b`. The macOS `reattach-to-user-namespace` wrapper is installed only when that legacy helper is present.
+It also carries over every default binding from upstream tmux-sensible, each set only when the key is still free: `prefix + R` reloads the config resolving the path in XDG order, the prefix letter switches to the last window, `C-p` and `C-n` move between windows, and `send-prefix` is wired when the prefix is not `C-b`. A key is free only at the moment this plugin loads, so a plugin loaded later can still claim one of these four; set `@sensible_revamped_keys` to `off` to skip them. The macOS `reattach-to-user-namespace` wrapper is installed only when that legacy helper is present.
 
 ## Install
 
@@ -68,6 +68,16 @@ run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
 - **Mouse stays off.** Enabling the mouse breaks terminal-native selection for many users, so this plugin does not touch it.
 - **Prefix is untouched.** It keeps `C-b`, matching upstream tmux-sensible.
 - **Clipboard order.** The copy command is chosen by environment: Wayland `wl-copy`, Termux `termux-clipboard-set`, macOS `pbcopy`, X11 `xclip` then `xsel`, and finally WSL `clip.exe`. `clip.exe` trails the X11 tools so a WSLg session keeps the UTF-8-safe path. With none available it relies on `set-clipboard on` and OSC 52, which also carries the clipboard back over SSH.
+
+## Configuration
+
+| Option | Default | Meaning |
+|--------|---------|---------|
+| `@sensible_revamped_keys` | `on` | set to `off` to skip the `R` reload, the prefix-letter last-window, `C-p`, and `C-n`; prefix wiring and the copy bindings still apply |
+
+```tmux
+set -g @sensible_revamped_keys 'off'
+```
 
 ## Known bugs it works around
 

@@ -327,6 +327,47 @@ teardown() {
   [[ "${output}" != *"bind-key R source-file"* ]]
 }
 
+@test "applier - keys off skips every convenience binding" {
+  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "off"; }
+
+  run apply_sensible
+
+  [[ "${output}" != *"last-window"* ]]
+  [[ "${output}" != *"bind-key C-p"* ]]
+  [[ "${output}" != *"bind-key C-n"* ]]
+  [[ "${output}" != *"bind-key R source-file"* ]]
+}
+
+@test "applier - keys off still wires a custom prefix" {
+  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "off"; }
+  _prefix() { echo "C-a"; }
+
+  run apply_sensible
+
+  [[ "${output}" == *"unbind-key C-b"* ]]
+  [[ "${output}" == *"bind-key C-a send-prefix"* ]]
+  [[ "${output}" != *"bind-key a last-window"* ]]
+}
+
+@test "applier - keys off still applies the copy bindings" {
+  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "off"; }
+  _have() { [[ "$1" == "xclip" ]]; }
+  export DISPLAY=":0"
+
+  run apply_sensible
+
+  [[ "${output}" == *"bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel"* ]]
+}
+
+@test "applier - keys on binds the convenience keys" {
+  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "on"; }
+
+  run apply_sensible
+
+  [[ "${output}" == *"bind-key C-n next-window"* ]]
+  [[ "${output}" == *"bind-key R source-file"* ]]
+}
+
 @test "applier - escape-time respects an explicit user value" {
   _get_server_option() { case "$1" in escape-time) echo "100" ;; *) echo "" ;; esac; }
   run apply_sensible
