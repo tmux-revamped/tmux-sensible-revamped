@@ -14,7 +14,7 @@ done
 TMUX_SOCKET="/tmp/tmux-plugin-test-${BASHPID}-${RANDOM}"
 
 setup_tmux_server() {
-  command tmux -S "${TMUX_SOCKET}" new-session -d -s test -x 200 -y 50 2>/dev/null
+  command tmux -S "${TMUX_SOCKET}" -f /dev/null new-session -d -s test -x 200 -y 50 2>/dev/null
   sleep 0.1
 }
 
