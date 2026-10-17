@@ -89,6 +89,42 @@ teardown() {
   [[ "${output}" != *":Tc"* ]]
 }
 
+@test "applier - a terminal feature already present is not appended again" {
+  # Arrange
+  _get_server_option() { case "$1" in terminal-features) printf '%s\n' 'xterm*:clipboard' '*:RGB' ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"terminal-features ,*:RGB"* ]] || false
+  [[ "${output}" == *"set -as terminal-features ,*:clipboard:ccolour:cstyle:focus:title"* ]]
+}
+
+@test "applier - a terminal override already present is not appended again" {
+  # Arrange
+  _get_server_option() { case "$1" in terminal-overrides) printf '%s\n' '*:Smulx=\E[4::%p1%dm' ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"Smulx"* ]] || false
+  [[ "${output}" == *"Setulc"* ]]
+}
+
+@test "applier - a legacy comma-joined override string is matched per entry" {
+  # Arrange
+  _tmux_version_string() { echo "tmux 2.8"; }
+  _get_option() { case "$1" in terminal-overrides) echo 'xterm*:XT,*:Tc' ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *":Tc"* ]]
+}
+
 @test "applier - undercurl override appears on tmux 3.0 and up" {
   _tmux_version_string() { echo "tmux 3.0"; }
   run apply_sensible

@@ -57,6 +57,17 @@ _set_window_default() {
   fi
 }
 
+_append_once() {
+  local flags="${1}" opt="${2}" entry="${3}" item current
+  item="${entry#,}"
+  current="$(_get_server_option "${opt}")"$'\n'"$(_get_option "${opt}")"
+  current=",$(printf '%s' "${current}" | tr '\n' ','),"
+  case "${current}" in
+    *",${item},"*) return 0 ;;
+  esac
+  _emit set "${flags}" "${opt}" "${entry}"
+}
+
 # _set_default_terminal VALUE -> set default-terminal at both session and server
 # scope, but only while it is still effectively unconfigured. The bare tmux
 # default `screen` and the common `screen-256color` both count as unconfigured so
@@ -139,14 +150,14 @@ apply_sensible() {
 
   if [[ "${tc}" -eq 1 ]]; then
     if version_ge "${ver}" 3.2; then
-      _emit set -as terminal-features ",*:RGB"
+      _append_once -as terminal-features ",*:RGB"
     else
-      _emit set -ga terminal-overrides ",*:Tc"
+      _append_once -ga terminal-overrides ",*:Tc"
     fi
   fi
   if version_ge "${ver}" 3.0; then
-    _emit set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
-    _emit set -ga terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
+    _append_once -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+    _append_once -ga terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m'
   fi
 
   # OSC 52 clipboard and cursor-shape passthrough on tmux below 3.2, where the
@@ -154,10 +165,10 @@ apply_sensible() {
   # terminals known to honor the escapes.
   if ! version_ge "${ver}" 3.2; then
     if osc52_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
-      _emit set -ga terminal-overrides ',*:Ms=\E]52;%p1%s;%p2%s\007'
+      _append_once -ga terminal-overrides ',*:Ms=\E]52;%p1%s;%p2%s\007'
     fi
     if cursor_shape_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
-      _emit set -ga terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'
+      _append_once -ga terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'
     fi
   fi
 
@@ -173,8 +184,8 @@ apply_sensible() {
     # Safe capability declarations: clipboard, cursor color, cursor style, focus
     # reporting, and title setting. Unlike RGB these never garble a terminal that
     # lacks them, so they apply to every terminal.
-    _emit set -as terminal-features ",*:clipboard:ccolour:cstyle:focus:title"
-    _emit set -as terminal-features ",rxvt*:ignorefkeys"
+    _append_once -as terminal-features ",*:clipboard:ccolour:cstyle:focus:title"
+    _append_once -as terminal-features ",rxvt*:ignorefkeys"
   fi
   # allow-passthrough keeps graphics alive in panes. `all` (3.4+) also updates
   # inactive panes; 3.3 only understands `on`. Default-aware so a user value wins.
@@ -186,17 +197,17 @@ apply_sensible() {
   # Sixel graphics and OSC 8 hyperlinks are declarable from 3.4.
   if version_ge "${ver}" 3.4; then
     if sixel_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
-      _emit set -as terminal-features ",*:sixel"
+      _append_once -as terminal-features ",*:sixel"
     fi
     if hyperlink_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
-      _emit set -as terminal-features ",*:hyperlinks"
+      _append_once -as terminal-features ",*:hyperlinks"
     fi
   fi
 
   # Extended keys (CSI u), only on terminals that support the protocol.
   if version_ge "${ver}" 3.2 && extended_keys_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
     _emit set -s extended-keys on
-    _emit set -as terminal-features "xterm*:extkeys"
+    _append_once -as terminal-features "xterm*:extkeys"
     if version_ge "${ver}" 3.5; then
       _emit set -s extended-keys-format csi-u
     fi

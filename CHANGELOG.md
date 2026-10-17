@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `R` reload binding keeps its confirmation message inside the binding.
   The bare `;` split the command at load, so the message fired on every load
   and the key only re-sourced the config.
+- `terminal-overrides` and `terminal-features` entries are appended only when
+  absent, so reloading the config no longer grows both lists without bound.
 
 ### Added
 
