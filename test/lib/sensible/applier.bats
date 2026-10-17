@@ -300,8 +300,14 @@ teardown() {
 }
 
 @test "applier - reload binding is emitted when R is free" {
+  # Arrange
+  local expected="bind-key R source-file ${TEST_TMPDIR}/.tmux.conf \\; display-message tmux-sensible-revamped: reloaded"
+
+  # Act
   run apply_sensible
-  [[ "${output}" == *"bind-key R source-file"* ]]
+
+  # Assert
+  [[ "${output}" == *"${expected}"* ]]
 }
 
 @test "applier - binds window navigation when unbound" {

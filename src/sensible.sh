@@ -273,7 +273,7 @@ _apply_convenience_keys() {
   fi
   if _key_unbound R; then
     conf="$(_config_path)"
-    _emit bind-key R source-file "${conf}" ";" display-message "tmux-sensible-revamped: reloaded"
+    _emit bind-key R source-file "${conf}" '\;' display-message "tmux-sensible-revamped: reloaded"
   fi
   return 0
 }

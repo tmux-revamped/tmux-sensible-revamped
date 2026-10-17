@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Negated and non-final assertions in the test suite now fail on bash 3.2,
   where a bare `! cmd` or `[[ ... ]]` before the last line never fails a test.
 - The README no longer quotes a test count or caps the supported tmux at 3.5.
+- The `R` reload binding keeps its confirmation message inside the binding.
+  The bare `;` split the command at load, so the message fired on every load
+  and the key only re-sourced the config.
 
 ### Added
 
