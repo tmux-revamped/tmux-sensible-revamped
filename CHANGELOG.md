@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the key only re-sourced the config.
 - `terminal-overrides` and `terminal-features` entries are appended only when
   absent, so reloading the config no longer grows both lists without bound.
+- `pane-base-index`, `renumber-windows`, `automatic-rename`,
+  `extended-keys`, `extended-keys-format`, the older-tmux
+  `aggressive-resize`, and the macOS `default-command` are applied only
+  while they hold the tmux default, as the README promised. The README now
+  states that the copy-mode bindings are always set, and no longer claims
+  the plugin line must sit early in the config.
 
 ### Added
 

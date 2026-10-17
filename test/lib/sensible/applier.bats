@@ -34,8 +34,8 @@ teardown() {
   [[ "${output}" == *"set -as terminal-features ,rxvt*:ignorefkeys"* ]] || false
   [[ "${output}" == *"set -g allow-passthrough all"* ]] || false
   [[ "${output}" == *"set -as terminal-features ,*:sixel"* ]] || false
-  [[ "${output}" == *"set -s extended-keys on"* ]] || false
-  [[ "${output}" == *"set -s extended-keys-format csi-u"* ]] || false
+  [[ "${output}" == *"set -sg extended-keys on"* ]] || false
+  [[ "${output}" == *"set -sg extended-keys-format csi-u"* ]] || false
   [[ "${output}" == *"set -sg escape-time 10"* ]] || false
   [[ "${output}" == *"set -g focus-events on"* ]] || false
   [[ "${output}" == *"set -g set-clipboard on"* ]] || false
@@ -212,7 +212,7 @@ teardown() {
 @test "applier - extended-keys is enabled on a broadened terminal" {
   export TERM="alacritty" TERM_PROGRAM=""
   run apply_sensible
-  [[ "${output}" == *"set -s extended-keys on"* ]]
+  [[ "${output}" == *"set -sg extended-keys on"* ]]
 }
 
 @test "applier - aggressive-resize on tmux 3.0+ is a control-mode hook" {
@@ -408,6 +408,57 @@ teardown() {
 
   [[ "${output}" == *"bind-key C-n next-window"* ]] || false
   [[ "${output}" == *"bind-key R source-file"* ]]
+}
+
+@test "applier - window and pane options respect explicit user values" {
+  # Arrange
+  _get_window_option() { case "$1" in pane-base-index) echo "5" ;; automatic-rename) echo "off" ;; *) echo "" ;; esac; }
+  _get_option() { case "$1" in renumber-windows) echo "on" ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"pane-base-index"* ]] || false
+  [[ "${output}" != *"automatic-rename"* ]] || false
+  [[ "${output}" != *"renumber-windows"* ]]
+}
+
+@test "applier - default-command respects an explicit user value" {
+  # Arrange
+  _uname() { echo "Darwin"; }
+  _have() { [[ "$1" == "reattach-to-user-namespace" ]]; }
+  _get_option() { case "$1" in default-command) echo "/bin/zsh" ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"default-command"* ]]
+}
+
+@test "applier - extended-keys respects an explicit user value" {
+  # Arrange
+  _get_server_option() { case "$1" in extended-keys) echo "always" ;; extended-keys-format) echo "csi-u" ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"set -sg extended-keys on"* ]] || false
+  [[ "${output}" != *"extended-keys-format"* ]]
+}
+
+@test "applier - older tmux aggressive-resize respects an explicit user value" {
+  # Arrange
+  _tmux_version_string() { echo "tmux 2.9"; }
+  _get_window_option() { case "$1" in aggressive-resize) echo "on" ;; *) echo "" ;; esac; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"aggressive-resize"* ]]
 }
 
 @test "applier - escape-time respects an explicit user value" {

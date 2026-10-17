@@ -52,7 +52,7 @@ With [TPM](https://github.com/tmux-plugins/tpm), add to `~/.tmux.conf`:
 set -g @plugin 'tmux-revamped/tmux-sensible-revamped'
 ```
 
-Then press `prefix + I` to install. Place it early so your own settings, sourced later, take precedence.
+Then press `prefix + I` to install. TPM runs plugins after the rest of your config, so where the line sits does not matter: each preference option is applied only while it still holds the tmux default, and your own value is left alone.
 
 Manual install:
 
@@ -63,7 +63,9 @@ run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
 
 ## Behavior notes
 
-- **Your config wins.** Scrollback, display time, status interval, repeat time, base index, the terminal type, focus events, clipboard, allow-passthrough, status keys, titles, display-panes time, word separators, and mode keys are applied only when still at the tmux default, so a value you set yourself is left alone.
+- **Your config wins for options.** Scrollback, display time, status interval, repeat time, base index, pane base index, window renumbering, automatic rename, the terminal type, escape time, focus events, clipboard, allow-passthrough, extended keys and their format, status keys, titles, display-panes time, word separators, mode keys, aggressive resize, and the macOS default command are applied only while they still hold the tmux default. A value you set yourself is left alone. A value you set to the tmux default itself cannot be told apart from an unset one, so it is replaced.
+- **Copy-mode keys are always bound.** The copy-mode yank, mouse-drag, and vi selection bindings (`y`, `Enter`, `v`, `C-v`, `M-w`, and `MouseDragEnd1Pane`) are bound on every load and replace any binding you made for those keys in the copy-mode tables. Bind your own after TPM runs to keep it.
+- **Terminal capabilities are appended once.** `terminal-overrides` and `terminal-features` entries are added only when absent, so they never displace your own entries.
 - **Nothing noisy is forced.** It does not touch activity monitoring or the mouse, so your own choices there are never overridden.
 - **Mouse stays off.** Enabling the mouse breaks terminal-native selection for many users, so this plugin does not touch it.
 - **Prefix is untouched.** It keeps `C-b`, matching upstream tmux-sensible.

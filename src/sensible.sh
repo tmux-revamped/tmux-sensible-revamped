@@ -206,10 +206,10 @@ apply_sensible() {
 
   # Extended keys (CSI u), only on terminals that support the protocol.
   if version_ge "${ver}" 3.2 && extended_keys_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
-    _emit set -s extended-keys on
+    _set_server_default extended-keys off on
     _append_once -as terminal-features "xterm*:extkeys"
     if version_ge "${ver}" 3.5; then
-      _emit set -s extended-keys-format csi-u
+      _set_server_default extended-keys-format xterm csi-u
     fi
   fi
 
@@ -229,12 +229,12 @@ apply_sensible() {
   # Window and pane hygiene.
   _set_default base-index 0 1
   if version_ge "${ver}" 1.6; then
-    _emit setw -g pane-base-index 1
+    _set_window_default pane-base-index 0 1
   fi
   if version_ge "${ver}" 1.7; then
-    _emit set -g renumber-windows on
+    _set_default renumber-windows off on
   fi
-  _emit setw -g automatic-rename on
+  _set_window_default automatic-rename on on
   # aggressive-resize on for normal clients, off under iTerm2's native tmux
   # integration (control mode), where it makes iTerm2 refuse to attach. On tmux
   # 3.0+ a client-attached hook decides per client, so plain tmux gets it in every
@@ -243,7 +243,7 @@ apply_sensible() {
   if version_ge "${ver}" 3.0; then
     _emit set-hook -g 'client-attached[1000]' "if-shell -F '#{client_control_mode}' 'setw -g aggressive-resize off' 'setw -g aggressive-resize on'"
   elif [[ "${iterm}" -eq 0 ]]; then
-    _emit setw -g aggressive-resize on
+    _set_window_default aggressive-resize off on
   fi
 
   # Copy mode and clipboard bindings. mode-keys follows the editor but never
@@ -255,7 +255,7 @@ apply_sensible() {
   # macOS pasteboard wrapper, only when the legacy helper is installed.
   if [[ "${os}" == "darwin" ]] && _have reattach-to-user-namespace; then
     # shellcheck disable=SC2016
-    _emit set -g default-command 'reattach-to-user-namespace -l $SHELL'
+    _set_default default-command '' 'reattach-to-user-namespace -l $SHELL'
   fi
 
   # Window navigation and prefix bindings, only when not already bound.
