@@ -81,6 +81,14 @@ run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
 set -g @sensible_revamped_keys 'off'
 ```
 
+### Internal state
+
+The plugin manages these options itself. Do not set them.
+
+| Option | Holds |
+|--------|-------|
+| `@sensible_revamped_resize_saved` | the global `aggressive-resize` value saved while a control-mode client is attached and the plugin forces it `off`; restored and unset once the last control client leaves |
+
 ## Known bugs it works around
 
 | Symptom | Fix |
