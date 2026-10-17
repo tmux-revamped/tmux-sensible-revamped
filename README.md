@@ -4,7 +4,7 @@
 
 **Sensible tmux defaults that normalize behavior across every tmux version, OS, and terminal, without clobbering your config.**
 
-[![Tests](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![Tests](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 
 </div>
 
@@ -42,7 +42,7 @@ Options above your tmux version are skipped silently. The minimum is tmux 1.9, t
 | Window and pane | `base-index 1`, `pane-base-index 1`, `renumber-windows on`, `automatic-rename on`, `aggressive-resize on` for normal clients, off under iTerm2 control mode | 1.6 and 1.7 where noted |
 | Copy mode | `mode-keys` from `$EDITOR`, version-gated system-clipboard yank and mouse-drag bindings (`copy-pipe-and-cancel` on 2.4+, the `vi-copy`/`emacs-copy` tables below), vi selection keys (`v`, `C-v`, `Enter`), and path-friendly `word-separators` | any |
 
-It also carries over every default binding from upstream tmux-sensible, each set only when the key is still free: `prefix + R` reloads the config resolving the path in XDG order, the prefix letter switches to the last window, `C-p` and `C-n` move between windows, and `send-prefix` is wired when the prefix is not `C-b`. A key is free only at the moment this plugin loads, so a plugin loaded later can still claim one of these four; set `@sensible_revamped_keys` to `off` to skip them. The macOS `reattach-to-user-namespace` wrapper is installed only when that legacy helper is present.
+It binds `C-p` and `C-n` to move between windows, and wires `send-prefix` when the prefix is not `C-b`. The other two upstream tmux-sensible bindings ship unbound and are opt-in: `@sensible_revamped_reload_key` reloads the config resolving the path in XDG order, and `@sensible_revamped_last_window_key` switches to the last window. Each key is set only when it is still free at the moment this plugin loads, so a plugin loaded later can still claim one; set `@sensible_revamped_keys` to `off` to skip all four. The macOS `reattach-to-user-namespace` wrapper is installed only when that legacy helper is present.
 
 ## Install
 
@@ -75,10 +75,13 @@ run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
 
 | Option | Default | Meaning |
 |--------|---------|---------|
-| `@sensible_revamped_keys` | `on` | set to `off` to skip the `R` reload, the prefix-letter last-window, `C-p`, and `C-n`; prefix wiring and the copy bindings still apply |
+| `@sensible_revamped_keys` | `on` | set to `off` to skip the reload and last-window keys, `C-p`, and `C-n`; prefix wiring and the copy bindings still apply |
+| `@sensible_revamped_reload_key` | empty | prefix key that reloads the config, unbound until set; upstream tmux-sensible used `R` |
+| `@sensible_revamped_last_window_key` | empty | prefix key that switches to the last window, unbound until set; upstream tmux-sensible used the prefix letter, such as `a` for `C-a` |
 
 ```tmux
-set -g @sensible_revamped_keys 'off'
+set -g @sensible_revamped_reload_key 'R'
+set -g @sensible_revamped_last_window_key 'a'
 ```
 
 ### Internal state

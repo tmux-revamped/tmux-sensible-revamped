@@ -430,9 +430,10 @@ EXPECTED
   [[ "${output}" == *"reattach-to-user-namespace -l \$SHELL"* ]]
 }
 
-@test "applier - reload binding is emitted when R is free" {
+@test "applier - reload binding is emitted on the reload key when it is free" {
   # Arrange
   local expected="bind-key R source-file ${TEST_TMPDIR}/.tmux.conf \\; display-message tmux-sensible-revamped: reloaded"
+  _get_option() { [[ "${1}" == "@sensible_revamped_reload_key" ]] && echo "R"; }
 
   # Act
   run apply_sensible
@@ -443,21 +444,43 @@ EXPECTED
 
 @test "applier - binds window navigation when unbound" {
   run apply_sensible
-  [[ "${output}" == *"bind-key b last-window"* ]] || false
   [[ "${output}" == *"bind-key C-p previous-window"* ]] || false
   [[ "${output}" == *"bind-key C-n next-window"* ]]
+}
+
+@test "applier - reload and last-window are unbound by default" {
+  # Arrange
+  _prefix() { echo "C-a"; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"last-window"* ]] || false
+  [[ "${output}" != *"bind-key R source-file"* ]]
+}
+
+@test "applier - binds last-window on the last-window key when it is free" {
+  # Arrange
+  _get_option() { [[ "${1}" == "@sensible_revamped_last_window_key" ]] && echo "a"; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" == *"bind-key a last-window"* ]]
 }
 
 @test "applier - binds send-prefix for a custom prefix" {
   _prefix() { echo "C-a"; }
   run apply_sensible
   [[ "${output}" == *"unbind-key C-b"* ]] || false
-  [[ "${output}" == *"bind-key C-a send-prefix"* ]] || false
-  [[ "${output}" == *"bind-key a last-window"* ]]
+  [[ "${output}" == *"bind-key C-a send-prefix"* ]]
 }
 
 @test "applier - existing user bindings are respected" {
   _key_unbound() { return 1; }
+  _get_option() { [[ "${1}" == "@sensible_revamped_reload_key" ]] && echo "R"; }
   run apply_sensible
   [[ "${output}" != *"bind-key C-p"* ]] || false
   [[ "${output}" != *"bind-key C-n"* ]] || false
@@ -465,7 +488,7 @@ EXPECTED
 }
 
 @test "applier - keys off skips every convenience binding" {
-  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "off"; }
+  _get_option() { case "${1}" in @sensible_revamped_keys) echo "off" ;; @sensible_revamped_reload_key) echo "R" ;; @sensible_revamped_last_window_key) echo "b" ;; esac; }
 
   run apply_sensible
 
@@ -497,7 +520,7 @@ EXPECTED
 }
 
 @test "applier - keys on binds the convenience keys" {
-  _get_option() { [[ "${1}" == "@sensible_revamped_keys" ]] && echo "on"; }
+  _get_option() { case "${1}" in @sensible_revamped_keys) echo "on" ;; @sensible_revamped_reload_key) echo "R" ;; esac; }
 
   run apply_sensible
 

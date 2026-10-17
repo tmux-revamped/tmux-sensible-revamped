@@ -132,7 +132,7 @@ _apply_copy_bindings() {
 
 # apply_sensible -> the full normalization pass.
 apply_sensible() {
-  local ver os dt mk clip prefix prefix_letter iterm=0
+  local ver os dt mk clip prefix iterm=0
   local tc=0 has_direct=0 has_256=0
   ver="$(tmux_version)"
   os="$(current_os)"
@@ -262,14 +262,13 @@ apply_sensible() {
 
   # Window navigation and prefix bindings, only when not already bound.
   prefix="$(_prefix)"
-  prefix_letter="${prefix#*-}"
   if [[ -n "${prefix}" && "${prefix}" != "C-b" ]]; then
     _emit unbind-key C-b
     if _key_unbound "${prefix}"; then
       _emit bind-key "${prefix}" send-prefix
     fi
   fi
-  _apply_convenience_keys "${prefix_letter}"
+  _apply_convenience_keys
 }
 
 _tmux_quote() {
@@ -315,10 +314,12 @@ resize_sync() {
 }
 
 _apply_convenience_keys() {
-  local prefix_letter="${1}" conf
+  local last_key reload_key conf
   [[ "$(_get_option @sensible_revamped_keys)" == "off" ]] && return 0
-  if [[ -n "${prefix_letter}" ]] && _key_unbound "${prefix_letter}"; then
-    _emit bind-key "${prefix_letter}" last-window
+  last_key="$(_get_option @sensible_revamped_last_window_key)"
+  reload_key="$(_get_option @sensible_revamped_reload_key)"
+  if [[ -n "${last_key}" ]] && _key_unbound "${last_key}"; then
+    _emit bind-key "${last_key}" last-window
   fi
   if _key_unbound C-p; then
     _emit bind-key C-p previous-window
@@ -326,9 +327,9 @@ _apply_convenience_keys() {
   if _key_unbound C-n; then
     _emit bind-key C-n next-window
   fi
-  if _key_unbound R; then
+  if [[ -n "${reload_key}" ]] && _key_unbound "${reload_key}"; then
     conf="$(_config_path)"
-    _emit bind-key R source-file "${conf}" '\;' display-message "tmux-sensible-revamped: reloaded"
+    _emit bind-key "${reload_key}" source-file "${conf}" '\;' display-message "tmux-sensible-revamped: reloaded"
   fi
   return 0
 }

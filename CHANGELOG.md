@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-17
+
+### Changed
+
+- **Breaking:** the `R` reload and the prefix-letter last-window bindings are
+  unbound by default. Set `@sensible_revamped_reload_key` to `R` and
+  `@sensible_revamped_last_window_key` to the prefix letter to bring them
+  back. `C-p` and `C-n` stay bound.
+
 ### Fixed
 
 - Version checks compare the major and minor numbers in bash instead of piping
