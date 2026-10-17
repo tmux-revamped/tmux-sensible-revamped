@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Version checks compare the major and minor numbers in bash instead of piping
+  through `sort -V`, which some `sort` implementations lack and which made every
+  version-gated option silently skip there.
+
 ### Added
 
 - `@sensible_revamped_keys`. Setting it to `off` skips the `R` reload, the

@@ -18,8 +18,32 @@ parse_tmux_version() {
 
 # version_ge HAVE WANT -> 0 when HAVE is greater than or equal to WANT.
 version_ge() {
-  [[ -n "${1}" && -n "${2}" ]] || return 1
-  [ "$(printf '%s\n%s\n' "${2}" "${1}" | sort -V | head -n1)" = "${2}" ]
+  local have_major have_minor want_major want_minor
+  have_major="$(_version_part "${1}" major)" || return 1
+  have_minor="$(_version_part "${1}" minor)" || return 1
+  want_major="$(_version_part "${2}" major)" || return 1
+  want_minor="$(_version_part "${2}" minor)" || return 1
+  if (( have_major != want_major )); then
+    (( have_major > want_major ))
+    return
+  fi
+  (( have_minor >= want_minor ))
+}
+
+_version_part() {
+  local value="${1}" part
+  if [[ "${2}" == "major" ]]; then
+    part="${value%%.*}"
+  elif [[ "${value}" == *.* ]]; then
+    part="${value#*.}"
+    part="${part%%[!0-9]*}"
+  else
+    part=0
+  fi
+  case "${part}" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+  printf '%d' "$((10#${part}))"
 }
 
 # truecolor_supported COLORTERM -> 0 when the value advertises 24-bit color.
@@ -221,6 +245,7 @@ resolve_clipboard() { clipboard_command "${WAYLAND_DISPLAY:-}" "${DISPLAY:-}" "$
 
 export -f parse_tmux_version
 export -f version_ge
+export -f _version_part
 export -f truecolor_supported
 export -f nested_term
 export -f should_truecolor

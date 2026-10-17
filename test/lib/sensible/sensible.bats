@@ -29,6 +29,28 @@ teardown() {
   ! version_ge "" 3.2
 }
 
+@test "sensible.sh - version_ge compares numerically without sort" {
+  # Arrange
+  sort() { return 1; }
+
+  # Act
+  run version_ge 3.10 3.9
+
+  # Assert
+  [ "${status}" -eq 0 ]
+}
+
+@test "sensible.sh - version_ge rejects an older minor without sort" {
+  # Arrange
+  sort() { return 1; }
+
+  # Act
+  run version_ge 3.1 3.2
+
+  # Assert
+  [ "${status}" -eq 1 ]
+}
+
 @test "sensible.sh - truecolor_supported reads COLORTERM" {
   truecolor_supported truecolor
   truecolor_supported 24bit
