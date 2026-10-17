@@ -89,7 +89,7 @@ set -g @sensible_revamped_keys 'off'
 | Truecolor not working inside tmux | `default-terminal tmux-256color` plus the `RGB` capability, not a non-256 terminal type |
 | Italics rendering as reverse video | `tmux-256color` instead of `screen-256color` |
 | Clipboard not propagating over SSH | `set-clipboard on` and the OSC 52 `clipboard` feature |
-| iTerm2 native integration breaking on resize | `aggressive-resize` is off only under iTerm2 control mode (a client-attached hook on tmux 3.0+), on everywhere else |
+| iTerm2 native integration breaking on resize | On tmux 3.0+, client-attached and client-detached hooks turn `aggressive-resize` off while any control-mode client is attached and restore the earlier value once none is. A normal client attaching never changes it |
 | Apple Terminal.app | left at 256 colors, since it has neither truecolor nor OSC 52 |
 
 ## Compatibility

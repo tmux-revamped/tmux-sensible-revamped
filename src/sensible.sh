@@ -13,6 +13,7 @@ PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # non-destructive when the live value still matches this, so it is stored once
 # instead of being repeated inline.
 SENSIBLE_DEFAULT_WORD_SEPARATORS='!"#$%&'\''()*+,-./:;<=>?@[\]^`{|}~'
+SENSIBLE_RESIZE_SAVED_OPTION='@sensible_revamped_resize_saved'
 
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/sensible/sensible.sh"
@@ -237,11 +238,12 @@ apply_sensible() {
   _set_window_default automatic-rename on on
   # aggressive-resize on for normal clients, off under iTerm2's native tmux
   # integration (control mode), where it makes iTerm2 refuse to attach. On tmux
-  # 3.0+ a client-attached hook decides per client, so plain tmux gets it in every
-  # terminal and control mode stays safe without ever turning it on at load time.
+  # 3.0+ client-attached and client-detached hooks turn it off while any
+  # control-mode client is attached and restore the saved value once none is,
+  # and it is never turned on at load time while a control-mode client is attached.
   # Older tmux has no indexed hooks, so it keeps the conservative skip-all-iTerm2.
   if version_ge "${ver}" 3.0; then
-    _emit set-hook -g 'client-attached[1000]' "if-shell -F '#{client_control_mode}' 'setw -g aggressive-resize off' 'setw -g aggressive-resize on'"
+    _apply_resize_hooks
   elif [[ "${iterm}" -eq 0 ]]; then
     _set_window_default aggressive-resize off on
   fi
@@ -270,6 +272,48 @@ apply_sensible() {
   _apply_convenience_keys "${prefix_letter}"
 }
 
+_tmux_quote() {
+  local quote="'" escaped="'\"'\"'"
+  printf "'%s'" "${1//"${quote}"/${escaped}}"
+}
+
+_hash_escape() {
+  local hash="#"
+  printf '%s' "${1//"${hash}"/${hash}${hash}}"
+}
+
+_resize_sync_hook() {
+  local script
+  script="$(printf '%q' "${PLUGIN_DIR}/src/sensible.sh")"
+  printf 'run-shell -b %s' "$(_tmux_quote "$(_hash_escape "bash ${script} --resize-sync")")"
+}
+
+_apply_resize_hooks() {
+  local hook
+  if [[ "$(_control_client_count)" -eq 0 ]]; then
+    _set_window_default aggressive-resize off on
+  fi
+  hook="$(_resize_sync_hook)"
+  _emit set-hook -g 'client-attached[1000]' "${hook}"
+  _emit set-hook -g 'client-detached[1000]' "${hook}"
+}
+
+resize_sync() {
+  local saved current
+  saved="$(_get_option "${SENSIBLE_RESIZE_SAVED_OPTION}")"
+  if [[ "$(_control_client_count)" -gt 0 ]]; then
+    if [[ -z "${saved}" ]]; then
+      current="$(_get_window_option aggressive-resize)"
+      _emit set -g "${SENSIBLE_RESIZE_SAVED_OPTION}" "${current:-off}"
+    fi
+    _emit setw -g aggressive-resize off
+    return 0
+  fi
+  [[ -n "${saved}" ]] || return 0
+  _emit setw -g aggressive-resize "${saved}"
+  _emit set -gu "${SENSIBLE_RESIZE_SAVED_OPTION}"
+}
+
 _apply_convenience_keys() {
   local prefix_letter="${1}" conf
   [[ "$(_get_option @sensible_revamped_keys)" == "off" ]] && return 0
@@ -290,5 +334,8 @@ _apply_convenience_keys() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  apply_sensible
+  case "${1:-}" in
+    --resize-sync) resize_sync ;;
+    *) apply_sensible ;;
+  esac
 fi

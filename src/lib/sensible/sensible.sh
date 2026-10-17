@@ -203,6 +203,7 @@ _terminfo_rgb() { infocmp -x "${1}" 2>/dev/null | grep -qE 'RGB|Tc'; }
 _prefix() { tmux show-option -gv prefix 2>/dev/null; }
 _get_server_option() { tmux show-option -sqv "${1}" 2>/dev/null; }
 _get_window_option() { tmux show-option -wgqv "${1}" 2>/dev/null; }
+_control_client_count() { tmux list-clients -F '#{client_control_mode}' 2>/dev/null | grep -c '^1$' || true; }
 
 # _key_unbound KEY -> 0 when KEY has no prefix-table binding, so a user binding is
 # never clobbered. Mirrors upstream tmux-sensible's list-keys match.
@@ -268,6 +269,7 @@ export -f _terminfo_rgb
 export -f _prefix
 export -f _get_server_option
 export -f _get_window_option
+export -f _control_client_count
 export -f _key_unbound
 export -f clipboard_command
 export -f tmux_version

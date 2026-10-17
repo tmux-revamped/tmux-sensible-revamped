@@ -18,6 +18,7 @@ setup() {
   _key_unbound() { return 0; }
   _get_server_option() { echo ""; }
   _get_window_option() { echo ""; }
+  _control_client_count() { echo 0; }
   export EDITOR="" VISUAL="" COLORTERM="truecolor" TERM_PROGRAM="" LC_TERMINAL="" TERM="xterm-256color"
   export WAYLAND_DISPLAY="" DISPLAY="" XDG_CONFIG_HOME=""
   export HOME="${TEST_TMPDIR}"
@@ -215,13 +216,107 @@ teardown() {
   [[ "${output}" == *"set -sg extended-keys on"* ]]
 }
 
-@test "applier - aggressive-resize on tmux 3.0+ is a control-mode hook" {
+@test "applier - aggressive-resize on tmux 3.0+ syncs through attach and detach hooks" {
+  # Arrange
   export TERM_PROGRAM="iTerm.app"
+
+  # Act
   run apply_sensible
-  [[ "${output}" == *"set-hook -g client-attached[1000]"* ]] || false
-  [[ "${output}" == *"client_control_mode"* ]] || false
-  [[ "${output}" == *"aggressive-resize off"* ]] || false
-  [[ "${output}" == *"aggressive-resize on"* ]]
+
+  # Assert
+  [[ "${output}" == *"set-hook -g client-attached[1000] run-shell -b "* ]] || false
+  [[ "${output}" == *"set-hook -g client-detached[1000] run-shell -b "* ]] || false
+  [[ "${output}" == *"--resize-sync"* ]] || false
+  [[ "${output}" == *"setw -g aggressive-resize on"* ]]
+}
+
+@test "applier - the resize hook never forces aggressive-resize on a normal client" {
+  # Arrange
+  local hook_lines
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  hook_lines="$(printf '%s\n' "${output}" | grep 'set-hook')"
+  [[ "${hook_lines}" != *"aggressive-resize on"* ]]
+}
+
+@test "applier - aggressive-resize is not turned on at load under a control-mode client" {
+  # Arrange
+  _control_client_count() { echo 1; }
+
+  # Act
+  run apply_sensible
+
+  # Assert
+  [[ "${output}" != *"setw -g aggressive-resize on"* ]] || false
+  [[ "${output}" == *"client-attached[1000]"* ]]
+}
+
+@test "applier - the resize hook quotes a plugin path with a space, a quote, and a hash" {
+  # Arrange
+  local expected
+  IFS= read -r expected <<'EXPECTED'
+run-shell -b 'bash /tmp/x\ y\'"'"'z##w/src/sensible.sh --resize-sync'
+EXPECTED
+  export PLUGIN_DIR="/tmp/x y'z#w"
+
+  # Act
+  run _resize_sync_hook
+
+  # Assert
+  [ "${output}" = "${expected}" ]
+}
+
+@test "applier - resize_sync saves the value and turns it off for a control-mode client" {
+  # Arrange
+  _control_client_count() { echo 1; }
+  _get_window_option() { case "$1" in aggressive-resize) echo "on" ;; *) echo "" ;; esac; }
+
+  # Act
+  run resize_sync
+
+  # Assert
+  [[ "${output}" == *"set -g @sensible_revamped_resize_saved on"* ]] || false
+  [[ "${output}" == *"setw -g aggressive-resize off"* ]]
+}
+
+@test "applier - resize_sync keeps the first saved value while control clients remain" {
+  # Arrange
+  _control_client_count() { echo 2; }
+  _get_option() { case "$1" in @sensible_revamped_resize_saved) echo "on" ;; *) echo "" ;; esac; }
+  _get_window_option() { case "$1" in aggressive-resize) echo "off" ;; *) echo "" ;; esac; }
+
+  # Act
+  run resize_sync
+
+  # Assert
+  [[ "${output}" != *"@sensible_revamped_resize_saved"* ]] || false
+  [[ "${output}" == *"setw -g aggressive-resize off"* ]]
+}
+
+@test "applier - resize_sync restores the saved value once no control-mode client remains" {
+  # Arrange
+  _get_option() { case "$1" in @sensible_revamped_resize_saved) echo "on" ;; *) echo "" ;; esac; }
+
+  # Act
+  run resize_sync
+
+  # Assert
+  [[ "${output}" == *"setw -g aggressive-resize on"* ]] || false
+  [[ "${output}" == *"set -gu @sensible_revamped_resize_saved"* ]]
+}
+
+@test "applier - resize_sync is a no-op for a normal client with nothing saved" {
+  # Arrange
+  _get_option() { echo ""; }
+
+  # Act
+  run resize_sync
+
+  # Assert
+  [ -z "${output}" ]
 }
 
 @test "applier - older tmux sets aggressive-resize on outside iTerm2" {

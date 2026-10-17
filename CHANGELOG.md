@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   while they hold the tmux default, as the README promised. The README now
   states that the copy-mode bindings are always set, and no longer claims
   the plugin line must sit early in the config.
+- The aggressive-resize hook no longer flips the global option on every
+  attach. A normal client attaching no longer turns it back on under an
+  attached iTerm2 control-mode client, and the earlier value is restored
+  once the last control-mode client leaves.
 
 ### Added
 

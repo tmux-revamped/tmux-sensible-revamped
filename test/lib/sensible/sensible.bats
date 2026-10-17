@@ -224,5 +224,6 @@ teardown() {
   run _get_server_option escape-time
   run _get_window_option mode-keys
   run _key_unbound R
+  run _control_client_count
   true
 }
