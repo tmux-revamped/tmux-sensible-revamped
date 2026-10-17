@@ -4,18 +4,18 @@
 
 <strong>Sensible tmux defaults, gated by tmux version and terminal, that leave the options you set alone.</strong>
 
-English &nbsp;|&nbsp; [日本語](README.ja.md) &nbsp;|&nbsp; [简体中文](README.zh-Hans.md) &nbsp;|&nbsp; [繁體中文（香港）](README.zh-HK.md)
+English | [日本語](README.ja.md) | [简体中文](README.zh-Hans.md) | [繁體中文（香港）](README.zh-HK.md)
 
 [![Tests](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 
 <p align="center">
-  <a href="#what-it-does">What it does</a> &nbsp;|&nbsp;
-  <a href="#requirements">Requirements</a> &nbsp;|&nbsp;
-  <a href="#installation">Installation</a> &nbsp;|&nbsp;
-  <a href="#configuration">Configuration</a> &nbsp;|&nbsp;
-  <a href="#key-bindings">Key bindings</a> &nbsp;|&nbsp;
+  <a href="#what-it-does">What it does</a> |
+  <a href="#requirements">Requirements</a> |
+  <a href="#installation">Installation</a> |
+  <a href="#configuration">Configuration</a> |
+  <a href="#key-bindings">Key bindings</a> |
   <a href="#how-it-works">How it works</a>
 </p>
 
