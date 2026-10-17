@@ -53,14 +53,14 @@ teardown() {
 @test "platform.sh - is_macos is true on Darwin" {
   _PLATFORM_OS_CACHE="Darwin"
   is_macos
-  ! is_linux
+  ! is_linux || false
   ! is_bsd
 }
 
 @test "platform.sh - is_linux is true on Linux" {
   _PLATFORM_OS_CACHE="Linux"
   is_linux
-  ! is_macos
+  ! is_macos || false
   ! is_bsd
 }
 

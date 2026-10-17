@@ -34,7 +34,7 @@ teardown() {
 @test "error-logger.sh - log_error writes a line when logging is enabled" {
   tmux set-option -gq @test_rev_enable_logging 1
   log_error startup "hello world"
-  [[ -f "${PLUGIN_LOG_FILE}" ]]
+  [[ -f "${PLUGIN_LOG_FILE}" ]] || false
   grep -q "startup" "${PLUGIN_LOG_FILE}"
   grep -q "hello world" "${PLUGIN_LOG_FILE}"
 }

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version checks compare the major and minor numbers in bash instead of piping
   through `sort -V`, which some `sort` implementations lack and which made every
   version-gated option silently skip there.
+- Negated and non-final assertions in the test suite now fail on bash 3.2,
+  where a bare `! cmd` or `[[ ... ]]` before the last line never fails a test.
+- The README no longer quotes a test count or caps the supported tmux at 3.5.
 
 ### Added
 

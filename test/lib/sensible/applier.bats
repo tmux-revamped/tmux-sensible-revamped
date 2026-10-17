@@ -29,33 +29,33 @@ teardown() {
 
 @test "applier - modern tmux 3.5 enables the full feature set" {
   run apply_sensible
-  [[ "${output}" == *"set -as terminal-features ,*:RGB"* ]]
-  [[ "${output}" == *"set -as terminal-features ,*:clipboard:ccolour:cstyle:focus:title"* ]]
-  [[ "${output}" == *"set -as terminal-features ,rxvt*:ignorefkeys"* ]]
-  [[ "${output}" == *"set -g allow-passthrough all"* ]]
-  [[ "${output}" == *"set -as terminal-features ,*:sixel"* ]]
-  [[ "${output}" == *"set -s extended-keys on"* ]]
-  [[ "${output}" == *"set -s extended-keys-format csi-u"* ]]
-  [[ "${output}" == *"set -sg escape-time 10"* ]]
-  [[ "${output}" == *"set -g focus-events on"* ]]
-  [[ "${output}" == *"set -g set-clipboard on"* ]]
-  [[ "${output}" == *"set -g set-titles on"* ]]
-  [[ "${output}" == *"set -g display-panes-time 2000"* ]]
-  [[ "${output}" == *"setw -g pane-base-index 1"* ]]
+  [[ "${output}" == *"set -as terminal-features ,*:RGB"* ]] || false
+  [[ "${output}" == *"set -as terminal-features ,*:clipboard:ccolour:cstyle:focus:title"* ]] || false
+  [[ "${output}" == *"set -as terminal-features ,rxvt*:ignorefkeys"* ]] || false
+  [[ "${output}" == *"set -g allow-passthrough all"* ]] || false
+  [[ "${output}" == *"set -as terminal-features ,*:sixel"* ]] || false
+  [[ "${output}" == *"set -s extended-keys on"* ]] || false
+  [[ "${output}" == *"set -s extended-keys-format csi-u"* ]] || false
+  [[ "${output}" == *"set -sg escape-time 10"* ]] || false
+  [[ "${output}" == *"set -g focus-events on"* ]] || false
+  [[ "${output}" == *"set -g set-clipboard on"* ]] || false
+  [[ "${output}" == *"set -g set-titles on"* ]] || false
+  [[ "${output}" == *"set -g display-panes-time 2000"* ]] || false
+  [[ "${output}" == *"setw -g pane-base-index 1"* ]] || false
   [[ "${output}" == *"set -g renumber-windows on"* ]]
 }
 
 @test "applier - tmux 1.9 skips features above its version" {
   _tmux_version_string() { echo "tmux 1.9"; }
   run apply_sensible
-  [[ "${output}" != *"terminal-features"* ]]
-  [[ "${output}" != *"allow-passthrough"* ]]
-  [[ "${output}" != *"extended-keys"* ]]
-  [[ "${output}" != *"Smulx"* ]]
-  [[ "${output}" != *":sixel"* ]]
-  [[ "${output}" == *"set -sg escape-time 10"* ]]
-  [[ "${output}" == *"set -g focus-events on"* ]]
-  [[ "${output}" == *"setw -g pane-base-index 1"* ]]
+  [[ "${output}" != *"terminal-features"* ]] || false
+  [[ "${output}" != *"allow-passthrough"* ]] || false
+  [[ "${output}" != *"extended-keys"* ]] || false
+  [[ "${output}" != *"Smulx"* ]] || false
+  [[ "${output}" != *":sixel"* ]] || false
+  [[ "${output}" == *"set -sg escape-time 10"* ]] || false
+  [[ "${output}" == *"set -g focus-events on"* ]] || false
+  [[ "${output}" == *"setw -g pane-base-index 1"* ]] || false
   [[ "${output}" == *"set -g renumber-windows on"* ]]
 }
 
@@ -63,7 +63,7 @@ teardown() {
   _tmux_version_string() { echo "tmux 2.8"; }
   export COLORTERM="truecolor"
   run apply_sensible
-  [[ "${output}" == *"set -ga terminal-overrides ,*:Tc"* ]]
+  [[ "${output}" == *"set -ga terminal-overrides ,*:Tc"* ]] || false
   [[ "${output}" != *"terminal-features ,*:RGB"* ]]
 }
 
@@ -71,7 +71,7 @@ teardown() {
   export COLORTERM=""
   _terminfo_rgb() { return 1; }
   run apply_sensible
-  [[ "${output}" != *":RGB"* ]]
+  [[ "${output}" != *":RGB"* ]] || false
   [[ "${output}" != *":Tc"* ]]
 }
 
@@ -85,7 +85,7 @@ teardown() {
 @test "applier - nested screen TERM is never tagged truecolor" {
   export COLORTERM="truecolor" TERM="screen-256color"
   run apply_sensible
-  [[ "${output}" != *":RGB"* ]]
+  [[ "${output}" != *":RGB"* ]] || false
   [[ "${output}" != *":Tc"* ]]
 }
 
@@ -99,13 +99,13 @@ teardown() {
   _tmux_version_string() { echo "tmux 3.0"; }
   export TERM="xterm-256color"
   run apply_sensible
-  [[ "${output}" == *"Ms=\\E]52"* ]]
+  [[ "${output}" == *"Ms=\\E]52"* ]] || false
   [[ "${output}" == *"Ss=\\E["* ]]
 }
 
 @test "applier - OSC 52 override is skipped on tmux 3.2 and up" {
   run apply_sensible
-  [[ "${output}" != *"Ms=\\E]52"* ]]
+  [[ "${output}" != *"Ms=\\E]52"* ]] || false
   [[ "${output}" != *"Ss=\\E["* ]]
 }
 
@@ -113,14 +113,14 @@ teardown() {
   _tmux_version_string() { echo "tmux 3.0"; }
   export TERM="dumb" TERM_PROGRAM=""
   run apply_sensible
-  [[ "${output}" != *"Ms="* ]]
+  [[ "${output}" != *"Ms="* ]] || false
   [[ "${output}" != *"Ss="* ]]
 }
 
 @test "applier - allow-passthrough is on (not all) on tmux 3.3" {
   _tmux_version_string() { echo "tmux 3.3" ; }
   run apply_sensible
-  [[ "${output}" == *"set -g allow-passthrough on"* ]]
+  [[ "${output}" == *"set -g allow-passthrough on"* ]] || false
   [[ "${output}" != *"allow-passthrough all"* ]]
 }
 
@@ -163,7 +163,7 @@ teardown() {
   _get_option() { case "$1" in default-terminal) echo "rxvt-unicode-256color" ;; *) echo "" ;; esac; }
   _get_server_option() { case "$1" in default-terminal) echo "rxvt-unicode-256color" ;; *) echo "" ;; esac; }
   run apply_sensible
-  [[ "${output}" != *"set -g default-terminal"* ]]
+  [[ "${output}" != *"set -g default-terminal"* ]] || false
   [[ "${output}" != *"set -sg default-terminal"* ]]
 }
 
@@ -182,23 +182,23 @@ teardown() {
 @test "applier - aggressive-resize on tmux 3.0+ is a control-mode hook" {
   export TERM_PROGRAM="iTerm.app"
   run apply_sensible
-  [[ "${output}" == *"set-hook -g client-attached[1000]"* ]]
-  [[ "${output}" == *"client_control_mode"* ]]
-  [[ "${output}" == *"aggressive-resize off"* ]]
+  [[ "${output}" == *"set-hook -g client-attached[1000]"* ]] || false
+  [[ "${output}" == *"client_control_mode"* ]] || false
+  [[ "${output}" == *"aggressive-resize off"* ]] || false
   [[ "${output}" == *"aggressive-resize on"* ]]
 }
 
 @test "applier - older tmux sets aggressive-resize on outside iTerm2" {
   _tmux_version_string() { echo "tmux 2.9"; }
   run apply_sensible
-  [[ "${output}" == *"aggressive-resize on"* ]]
+  [[ "${output}" == *"aggressive-resize on"* ]] || false
   [[ "${output}" != *"client-attached"* ]]
 }
 
 @test "applier - explicit user configuration is respected" {
   _get_option() { case "$1" in history-limit) echo "9999" ;; *) echo "" ;; esac; }
   run apply_sensible
-  [[ "${output}" != *"set -g history-limit 50000"* ]]
+  [[ "${output}" != *"set -g history-limit 50000"* ]] || false
   [[ "${output}" == *"set -g status-interval 5"* ]]
 }
 
@@ -243,14 +243,14 @@ teardown() {
 @test "applier - copy bindings fall back to OSC52 without a tool" {
   _have() { return 1; }
   run apply_sensible
-  [[ "${output}" == *"copy-selection-and-cancel"* ]]
+  [[ "${output}" == *"copy-selection-and-cancel"* ]] || false
   [[ "${output}" != *"copy-pipe-and-cancel"* ]]
 }
 
 @test "applier - vi selection keys are bound on tmux 2.4+" {
   run apply_sensible
-  [[ "${output}" == *"bind-key -T copy-mode-vi v send-keys -X begin-selection"* ]]
-  [[ "${output}" == *"bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle"* ]]
+  [[ "${output}" == *"bind-key -T copy-mode-vi v send-keys -X begin-selection"* ]] || false
+  [[ "${output}" == *"bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle"* ]] || false
   [[ "${output}" == *"bind-key -T copy-mode-vi Enter send-keys -X copy-selection-and-cancel"* ]]
 }
 
@@ -259,9 +259,9 @@ teardown() {
   _uname() { echo "Darwin"; }
   _have() { [[ "$1" == "pbcopy" ]]; }
   run apply_sensible
-  [[ "${output}" == *"bind-key -t vi-copy y copy-pipe pbcopy"* ]]
-  [[ "${output}" == *"bind-key -t emacs-copy M-w copy-pipe pbcopy"* ]]
-  [[ "${output}" == *"bind-key -t vi-copy v begin-selection"* ]]
+  [[ "${output}" == *"bind-key -t vi-copy y copy-pipe pbcopy"* ]] || false
+  [[ "${output}" == *"bind-key -t emacs-copy M-w copy-pipe pbcopy"* ]] || false
+  [[ "${output}" == *"bind-key -t vi-copy v begin-selection"* ]] || false
   [[ "${output}" != *"copy-pipe-and-cancel"* ]]
 }
 
@@ -269,7 +269,7 @@ teardown() {
   _tmux_version_string() { echo "tmux 2.3"; }
   _have() { return 1; }
   run apply_sensible
-  [[ "${output}" == *"bind-key -t vi-copy y copy-selection"* ]]
+  [[ "${output}" == *"bind-key -t vi-copy y copy-selection"* ]] || false
   [[ "${output}" == *"bind-key -t emacs-copy M-w copy-selection"* ]]
 }
 
@@ -288,7 +288,7 @@ teardown() {
 
 @test "applier - opinionated noisy options are not forced" {
   run apply_sensible
-  [[ "${output}" != *"monitor-activity"* ]]
+  [[ "${output}" != *"monitor-activity"* ]] || false
   [[ "${output}" != *"set -g mouse"* ]]
 }
 
@@ -306,24 +306,24 @@ teardown() {
 
 @test "applier - binds window navigation when unbound" {
   run apply_sensible
-  [[ "${output}" == *"bind-key b last-window"* ]]
-  [[ "${output}" == *"bind-key C-p previous-window"* ]]
+  [[ "${output}" == *"bind-key b last-window"* ]] || false
+  [[ "${output}" == *"bind-key C-p previous-window"* ]] || false
   [[ "${output}" == *"bind-key C-n next-window"* ]]
 }
 
 @test "applier - binds send-prefix for a custom prefix" {
   _prefix() { echo "C-a"; }
   run apply_sensible
-  [[ "${output}" == *"unbind-key C-b"* ]]
-  [[ "${output}" == *"bind-key C-a send-prefix"* ]]
+  [[ "${output}" == *"unbind-key C-b"* ]] || false
+  [[ "${output}" == *"bind-key C-a send-prefix"* ]] || false
   [[ "${output}" == *"bind-key a last-window"* ]]
 }
 
 @test "applier - existing user bindings are respected" {
   _key_unbound() { return 1; }
   run apply_sensible
-  [[ "${output}" != *"bind-key C-p"* ]]
-  [[ "${output}" != *"bind-key C-n"* ]]
+  [[ "${output}" != *"bind-key C-p"* ]] || false
+  [[ "${output}" != *"bind-key C-n"* ]] || false
   [[ "${output}" != *"bind-key R source-file"* ]]
 }
 
@@ -332,9 +332,9 @@ teardown() {
 
   run apply_sensible
 
-  [[ "${output}" != *"last-window"* ]]
-  [[ "${output}" != *"bind-key C-p"* ]]
-  [[ "${output}" != *"bind-key C-n"* ]]
+  [[ "${output}" != *"last-window"* ]] || false
+  [[ "${output}" != *"bind-key C-p"* ]] || false
+  [[ "${output}" != *"bind-key C-n"* ]] || false
   [[ "${output}" != *"bind-key R source-file"* ]]
 }
 
@@ -344,8 +344,8 @@ teardown() {
 
   run apply_sensible
 
-  [[ "${output}" == *"unbind-key C-b"* ]]
-  [[ "${output}" == *"bind-key C-a send-prefix"* ]]
+  [[ "${output}" == *"unbind-key C-b"* ]] || false
+  [[ "${output}" == *"bind-key C-a send-prefix"* ]] || false
   [[ "${output}" != *"bind-key a last-window"* ]]
 }
 
@@ -364,7 +364,7 @@ teardown() {
 
   run apply_sensible
 
-  [[ "${output}" == *"bind-key C-n next-window"* ]]
+  [[ "${output}" == *"bind-key C-n next-window"* ]] || false
   [[ "${output}" == *"bind-key R source-file"* ]]
 }
 
@@ -400,7 +400,7 @@ teardown() {
   export HOME="${TEST_TMPDIR}"
   mkdir -p "${TEST_TMPDIR}/.config/tmux"
   : > "${TEST_TMPDIR}/.config/tmux/tmux.conf"
-  [[ "$(_config_path)" == "${TEST_TMPDIR}/.config/tmux/tmux.conf" ]]
+  [[ "$(_config_path)" == "${TEST_TMPDIR}/.config/tmux/tmux.conf" ]] || false
   rm -f "${TEST_TMPDIR}/.config/tmux/tmux.conf"
   [[ "$(_config_path)" == "${TEST_TMPDIR}/.tmux.conf" ]]
 }

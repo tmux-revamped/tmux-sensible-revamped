@@ -13,10 +13,10 @@ teardown() {
 }
 
 @test "sensible.sh - parse_tmux_version handles suffixes and prefixes" {
-  [[ "$(parse_tmux_version 'tmux 3.4')" == "3.4" ]]
-  [[ "$(parse_tmux_version 'tmux 3.4a')" == "3.4" ]]
-  [[ "$(parse_tmux_version 'tmux next-3.5')" == "3.5" ]]
-  [[ "$(parse_tmux_version 'tmux 1.9')" == "1.9" ]]
+  [[ "$(parse_tmux_version 'tmux 3.4')" == "3.4" ]] || false
+  [[ "$(parse_tmux_version 'tmux 3.4a')" == "3.4" ]] || false
+  [[ "$(parse_tmux_version 'tmux next-3.5')" == "3.5" ]] || false
+  [[ "$(parse_tmux_version 'tmux 1.9')" == "1.9" ]] || false
   [[ "$(parse_tmux_version 'tmux 2.9a')" == "2.9" ]]
 }
 
@@ -24,8 +24,8 @@ teardown() {
   version_ge 3.4 3.2
   version_ge 3.2 3.2
   version_ge 1.9 1.6
-  ! version_ge 3.1 3.2
-  ! version_ge 2.9 3.0
+  ! version_ge 3.1 3.2 || false
+  ! version_ge 2.9 3.0 || false
   ! version_ge "" 3.2
 }
 
@@ -54,7 +54,7 @@ teardown() {
 @test "sensible.sh - truecolor_supported reads COLORTERM" {
   truecolor_supported truecolor
   truecolor_supported 24bit
-  ! truecolor_supported 256
+  ! truecolor_supported 256 || false
   ! truecolor_supported ""
 }
 
@@ -62,7 +62,7 @@ teardown() {
   nested_term screen
   nested_term screen-256color
   nested_term tmux-256color
-  ! nested_term xterm-256color
+  ! nested_term xterm-256color || false
   ! nested_term ""
 }
 
@@ -82,7 +82,7 @@ teardown() {
 
 @test "sensible.sh - should_truecolor never tags a nested terminal" {
   _terminfo_rgb() { return 0; }
-  ! should_truecolor truecolor screen-256color
+  ! should_truecolor truecolor screen-256color || false
   ! should_truecolor "" tmux-256color
 }
 
@@ -96,7 +96,7 @@ teardown() {
   extended_keys_terminal "" WezTerm
   extended_keys_terminal "" contour
   extended_keys_terminal "" rio
-  ! extended_keys_terminal dumb ""
+  ! extended_keys_terminal dumb "" || false
   ! extended_keys_terminal screen-256color "Apple_Terminal"
 }
 
@@ -120,7 +120,7 @@ teardown() {
   sixel_terminal foot ""
   sixel_terminal "" WezTerm
   sixel_terminal "" iTerm.app
-  ! sixel_terminal alacritty ""
+  ! sixel_terminal alacritty "" || false
   ! sixel_terminal "" Apple_Terminal
 }
 
@@ -128,14 +128,14 @@ teardown() {
   hyperlink_terminal xterm-kitty ""
   hyperlink_terminal alacritty ""
   hyperlink_terminal "" WezTerm
-  ! hyperlink_terminal dumb ""
+  ! hyperlink_terminal dumb "" || false
   ! hyperlink_terminal "" Apple_Terminal
 }
 
 @test "sensible.sh - choose_default_terminal prefers direct then 256 then screen" {
-  [[ "$(choose_default_terminal 1 1 1)" == "tmux-direct" ]]
-  [[ "$(choose_default_terminal 1 0 1)" == "tmux-256color" ]]
-  [[ "$(choose_default_terminal 0 1 1)" == "tmux-256color" ]]
+  [[ "$(choose_default_terminal 1 1 1)" == "tmux-direct" ]] || false
+  [[ "$(choose_default_terminal 1 0 1)" == "tmux-256color" ]] || false
+  [[ "$(choose_default_terminal 0 1 1)" == "tmux-256color" ]] || false
   [[ "$(choose_default_terminal 0 0 0)" == "screen-256color" ]]
 }
 
@@ -143,14 +143,14 @@ teardown() {
   default_terminal_unset ""
   default_terminal_unset screen
   default_terminal_unset screen-256color
-  ! default_terminal_unset tmux-256color
+  ! default_terminal_unset tmux-256color || false
   ! default_terminal_unset rxvt-unicode-256color
 }
 
 @test "sensible.sh - os_kind classifies the host" {
-  [[ "$(os_kind Darwin '')" == "darwin" ]]
-  [[ "$(os_kind Linux 'Linux version 5.15 microsoft-standard-WSL2')" == "wsl" ]]
-  [[ "$(os_kind Linux 'Linux version 6.1 generic')" == "linux" ]]
+  [[ "$(os_kind Darwin '')" == "darwin" ]] || false
+  [[ "$(os_kind Linux 'Linux version 5.15 microsoft-standard-WSL2')" == "wsl" ]] || false
+  [[ "$(os_kind Linux 'Linux version 6.1 generic')" == "linux" ]] || false
   [[ "$(os_kind FreeBSD '')" == "other" ]]
 }
 
@@ -158,31 +158,31 @@ teardown() {
   is_iterm "iTerm.app" ""
   is_iterm "iTerm2" ""
   is_iterm "" "iTerm2"
-  ! is_iterm "Apple_Terminal" ""
+  ! is_iterm "Apple_Terminal" "" || false
   ! is_iterm "" ""
 }
 
 @test "sensible.sh - editor_mode_keys maps vi family to vi" {
-  [[ "$(editor_mode_keys nvim)" == "vi" ]]
-  [[ "$(editor_mode_keys /usr/bin/vim)" == "vi" ]]
-  [[ "$(editor_mode_keys vi)" == "vi" ]]
-  [[ "$(editor_mode_keys emacs)" == "emacs" ]]
+  [[ "$(editor_mode_keys nvim)" == "vi" ]] || false
+  [[ "$(editor_mode_keys /usr/bin/vim)" == "vi" ]] || false
+  [[ "$(editor_mode_keys vi)" == "vi" ]] || false
+  [[ "$(editor_mode_keys emacs)" == "emacs" ]] || false
   [[ "$(editor_mode_keys '')" == "emacs" ]]
 }
 
 @test "sensible.sh - clipboard_command picks by priority" {
   _have() { [[ "$1" == "wl-copy" ]]; }
-  [[ "$(clipboard_command wayland '' linux)" == "wl-copy" ]]
+  [[ "$(clipboard_command wayland '' linux)" == "wl-copy" ]] || false
   _have() { [[ "$1" == "termux-clipboard-set" ]]; }
-  [[ "$(clipboard_command '' '' linux)" == "termux-clipboard-set" ]]
+  [[ "$(clipboard_command '' '' linux)" == "termux-clipboard-set" ]] || false
   _have() { [[ "$1" == "clip.exe" ]]; }
-  [[ "$(clipboard_command '' '' wsl)" == "clip.exe" ]]
+  [[ "$(clipboard_command '' '' wsl)" == "clip.exe" ]] || false
   _have() { [[ "$1" == "pbcopy" ]]; }
-  [[ "$(clipboard_command '' '' darwin)" == "pbcopy" ]]
+  [[ "$(clipboard_command '' '' darwin)" == "pbcopy" ]] || false
   _have() { [[ "$1" == "xclip" ]]; }
-  [[ "$(clipboard_command '' :0 linux)" == "xclip -selection clipboard" ]]
+  [[ "$(clipboard_command '' :0 linux)" == "xclip -selection clipboard" ]] || false
   _have() { [[ "$1" == "xsel" ]]; }
-  [[ "$(clipboard_command '' :0 linux)" == "xsel -ib" ]]
+  [[ "$(clipboard_command '' :0 linux)" == "xsel -ib" ]] || false
   _have() { return 1; }
   [[ -z "$(clipboard_command '' '' other)" ]]
 }
@@ -200,7 +200,7 @@ teardown() {
 @test "sensible.sh - current_os and tmux_version use the seams" {
   _uname() { echo "Darwin"; }
   _proc_version() { echo ""; }
-  [[ "$(current_os)" == "darwin" ]]
+  [[ "$(current_os)" == "darwin" ]] || false
   _tmux_version_string() { echo "tmux 3.3a"; }
   [[ "$(tmux_version)" == "3.3" ]]
 }

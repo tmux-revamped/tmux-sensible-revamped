@@ -8,7 +8,7 @@
 
 </div>
 
-**40+** normalized settings · **tmux 1.9 to 3.5** · **Linux, macOS, WSL** · **96** tests · **95%+** coverage
+**40+** normalized settings · **tmux 1.9 and up** · **Linux, macOS, WSL** · **95%+** coverage
 
 One config that behaves the same regardless of the tmux version, the operating system, the terminal emulator, and what is running inside the pane. Every option is gated to the tmux versions that support it, so the same plugin runs cleanly on every tmux TPM supports, from 1.9 up. Truecolor, the system clipboard, undercurl, and extended keys are enabled per detected capability, and several long-standing terminal bugs are worked around. Your own explicit settings always win.
 
@@ -16,7 +16,7 @@ Built from [tmux-plugin-template](https://github.com/tmux-revamped/tmux-plugin-t
 
 <table>
 <tr>
-<td><strong>Version-aware</strong><br>Each option is applied only on the tmux versions that support it, so nothing errors from 1.9 to 3.5.</td>
+<td><strong>Version-aware</strong><br>Each option is applied only on the tmux versions that support it, so nothing errors from 1.9 up.</td>
 <td><strong>Terminal-aware</strong><br>Truecolor, OSC 52 clipboard, undercurl, and CSI u keys are enabled per detected capability, with per-emulator fixes.</td>
 </tr>
 <tr>
