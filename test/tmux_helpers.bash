@@ -42,3 +42,9 @@ set_option() {
 export -f tmux
 export TMUX_SOCKET
 export PLUGIN_DIR
+
+_TMUX_HELPERS_LOCAL="$(dirname "${BASH_SOURCE[0]}")/tmux_helpers_local.bash"
+if [ -f "${_TMUX_HELPERS_LOCAL}" ]; then
+  # shellcheck source=/dev/null
+  source "${_TMUX_HELPERS_LOCAL}"
+fi

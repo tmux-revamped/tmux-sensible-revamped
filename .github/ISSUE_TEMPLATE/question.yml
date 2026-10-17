@@ -5,9 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before asking, please check:
-        - [README](https://github.com/tmux-revamped/tmux-sensible-revamped#readme)
-        - [Existing issues](https://github.com/tmux-revamped/tmux-sensible-revamped/issues?q=is%3Aissue)
+        Before asking, please check this plugin's README and its existing issues.
 
   - type: textarea
     id: question

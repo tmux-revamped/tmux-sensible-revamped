@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in tmux-sensible-revamped
+description: Report a bug in this plugin
 labels: ["bug"]
 body:
   - type: markdown
@@ -70,8 +70,15 @@ body:
       required: true
 
   - type: textarea
+    id: doctor
+    attributes:
+      label: Diagnostics
+      description: Output of the plugin's doctor command, if it has one
+      render: shell
+
+  - type: textarea
     id: config
     attributes:
       label: Relevant tmux.conf
-      description: The tmux-sensible-revamped section of your tmux.conf
+      description: The section of your tmux.conf that configures this plugin
       render: tmux
