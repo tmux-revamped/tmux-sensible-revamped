@@ -40,7 +40,7 @@ The plugin sets the defaults most tmux users end up writing by hand: no ESC dela
 | Clipboard and passthrough | `set-clipboard on`, `allow-passthrough on` on 3.3 and `all` on 3.4 and later, and the `clipboard`, `ccolour`, `cstyle`, `focus` and `title` terminal features | 3.2 for the features |
 | Older tmux escapes | the OSC 52 `Ms` override and the `Ss` and `Se` cursor-shape overrides, for terminals known to honor them | below 3.2 only |
 | Graphics | the `sixel` and `hyperlinks` terminal features for terminals that support them | 3.4 |
-| Extended keys | `extended-keys on` and the `extkeys` feature for terminals that speak CSI u, and `extended-keys-format csi-u` on 3.5 and later | 3.2 |
+| Extended keys | `extended-keys on`, and `extended-keys-format csi-u` on 3.5 and later, whatever `TERM` the server started with: tmux sends the request only to a terminal it knows has the `extkeys` feature. The `extkeys` feature itself is claimed for terminals that speak CSI u | 3.2 |
 | Scrollback and status | `history-limit 50000`, `display-time 4000`, `status-interval 5`, `repeat-time 1000`, `display-panes-time 2000`, `set-titles on` | any |
 | Windows and panes | `base-index 1`, `pane-base-index 1`, `renumber-windows on`, `aggressive-resize on` | 1.6 and 1.7 for the second and third |
 | Copy mode | `mode-keys vi` when `$EDITOR` or `$VISUAL` contains `vi`, else `emacs`. `word-separators` set to a single space, so a double click selects a whole path or URL | any |

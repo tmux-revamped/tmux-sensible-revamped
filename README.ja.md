@@ -40,7 +40,7 @@ tmuxの既定値のままのときだけ設定するオプションが**22**個�
 | クリップボードとパススルー | `set-clipboard on`、3.3では`allow-passthrough on`、3.4以降では`all`、そして端末機能`clipboard`、`ccolour`、`cstyle`、`focus`、`title` | 機能は3.2 |
 | 古いtmux向けのエスケープ | OSC 52の`Ms`上書きと、カーソル形状の`Ss`と`Se`上書き。対応が分かっている端末に限ります | 3.2未満のみ |
 | グラフィックス | 対応する端末向けの端末機能`sixel`と`hyperlinks` | 3.4 |
-| 拡張キー | CSI uを話す端末向けの`extended-keys on`と機能`extkeys`、3.5以降では`extended-keys-format csi-u` | 3.2 |
+| 拡張キー | サーバーがどの`TERM`で起動しても`extended-keys on`、3.5以降では`extended-keys-format csi-u`。tmuxは機能`extkeys`を持つと分かっている端末にだけ要求を送ります。機能`extkeys`自体はCSI uを話す端末に対してだけ宣言します | 3.2 |
 | スクロールバックとステータス | `history-limit 50000`、`display-time 4000`、`status-interval 5`、`repeat-time 1000`、`display-panes-time 2000`、`set-titles on` | すべて |
 | ウィンドウとペイン | `base-index 1`、`pane-base-index 1`、`renumber-windows on`、`aggressive-resize on` | 2つ目は1.6、3つ目は1.7 |
 | コピーモード | `$EDITOR`か`$VISUAL`に`vi`が含まれれば`mode-keys vi`、そうでなければ`emacs`。`word-separators`を空白1文字にするので、ダブルクリックでパスやURL全体を選択できます | すべて |

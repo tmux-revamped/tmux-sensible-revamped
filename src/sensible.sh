@@ -164,9 +164,11 @@ apply_sensible() {
     fi
   fi
 
-  if version_ge "${ver}" 3.2 && extended_keys_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
+  if version_ge "${ver}" 3.2; then
     _set_server_default extended-keys off on
-    _append_once -as terminal-features "xterm*:extkeys"
+    if extended_keys_terminal "${TERM:-}" "${TERM_PROGRAM:-}"; then
+      _append_once -as terminal-features "xterm*:extkeys"
+    fi
     if version_ge "${ver}" 3.5; then
       _set_server_default extended-keys-format xterm csi-u
     fi

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-16
+
+### Fixed
+
+- `extended-keys on`, and `extended-keys-format csi-u` on tmux 3.5 and
+  later, are set whatever `TERM` and `TERM_PROGRAM` the tmux server
+  started with. A server started by launchd, a systemd unit or an IDE
+  has neither, so the terminal check left extended keys off and
+  Shift+Enter reached applications as a plain Enter. tmux sends the
+  request only to a client whose terminal has the `extkeys` feature, so
+  a terminal without it receives nothing. The `xterm*:extkeys` feature
+  claim still follows the terminal check.
+
 ## [2.0.0] - 2026-10-17
 
 ### Changed

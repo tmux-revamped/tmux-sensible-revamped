@@ -40,7 +40,7 @@
 | 剪貼簿與穿透 | `set-clipboard on`，3.3 上為 `allow-passthrough on`，3.4 或以後為 `all`，以及終端機功能 `clipboard`、`ccolour`、`cstyle`、`focus` 和 `title` | 功能需要 3.2 |
 | 舊版 tmux 的跳脫序列 | OSC 52 的 `Ms` 覆寫，以及游標形狀的 `Ss` 和 `Se` 覆寫，只用於已知支援的終端機 | 只限 3.2 以下 |
 | 圖形 | 為支援的終端機啟用 `sixel` 和 `hyperlinks` 終端機功能 | 3.4 |
-| 擴展按鍵 | 為支援 CSI u 的終端機設定 `extended-keys on` 和 `extkeys` 功能，3.5 或以後設定 `extended-keys-format csi-u` | 3.2 |
+| 擴展按鍵 | 無論伺服器以哪個 `TERM` 啟動，都設定 `extended-keys on`，3.5 或以後設定 `extended-keys-format csi-u`：tmux 只向已知具備 `extkeys` 功能的終端機發送請求。`extkeys` 功能本身只為支援 CSI u 的終端機宣告 | 3.2 |
 | 回捲與狀態列 | `history-limit 50000`、`display-time 4000`、`status-interval 5`、`repeat-time 1000`、`display-panes-time 2000`、`set-titles on` | 任何 |
 | 視窗與窗格 | `base-index 1`、`pane-base-index 1`、`renumber-windows on`、`aggressive-resize on` | 第二項需要 1.6，第三項需要 1.7 |
 | 複製模式 | `$EDITOR` 或 `$VISUAL` 含有 `vi` 時為 `mode-keys vi`，否則為 `emacs`。`word-separators` 設為單一空格，因此按兩下會選取整個路徑或 URL | 任何 |

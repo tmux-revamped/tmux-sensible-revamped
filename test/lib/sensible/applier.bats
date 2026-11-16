@@ -204,16 +204,29 @@ teardown() {
   [[ "${output}" != *"set -sg default-terminal"* ]]
 }
 
-@test "applier - extended-keys is skipped on unsupporting terminals" {
-  export TERM="dumb" TERM_PROGRAM=""
+@test "applier - extended-keys is enabled with no TERM or TERM_PROGRAM, and extkeys is not claimed" {
+  # Arrange
+  export TERM="" TERM_PROGRAM=""
+
+  # Act
   run apply_sensible
-  [[ "${output}" != *"extended-keys"* ]]
+
+  # Assert
+  [[ "${output}" == *"set -sg extended-keys on"* ]] || false
+  [[ "${output}" == *"set -sg extended-keys-format csi-u"* ]] || false
+  [[ "${output}" != *"extkeys"* ]]
 }
 
-@test "applier - extended-keys is enabled on a broadened terminal" {
+@test "applier - the extkeys feature is claimed on a broadened terminal" {
+  # Arrange
   export TERM="alacritty" TERM_PROGRAM=""
+
+  # Act
   run apply_sensible
-  [[ "${output}" == *"set -sg extended-keys on"* ]]
+
+  # Assert
+  [[ "${output}" == *"set -sg extended-keys on"* ]] || false
+  [[ "${output}" == *"set -as terminal-features xterm*:extkeys"* ]]
 }
 
 @test "applier - aggressive-resize on tmux 3.0+ syncs through attach and detach hooks" {

@@ -40,7 +40,7 @@
 | 剪贴板与透传 | `set-clipboard on`，3.3 上为 `allow-passthrough on`，3.4 及以后为 `all`，以及终端特性 `clipboard`、`ccolour`、`cstyle`、`focus` 和 `title` | 特性需要 3.2 |
 | 旧版 tmux 的转义序列 | OSC 52 的 `Ms` 覆盖，以及光标形状的 `Ss` 和 `Se` 覆盖，仅用于已知支持的终端 | 仅 3.2 以下 |
 | 图形 | 为支持的终端启用 `sixel` 和 `hyperlinks` 终端特性 | 3.4 |
-| 扩展按键 | 为支持 CSI u 的终端设置 `extended-keys on` 和 `extkeys` 特性，3.5 及以后设置 `extended-keys-format csi-u` | 3.2 |
+| 扩展按键 | 无论服务器以哪个 `TERM` 启动，都设置 `extended-keys on`，3.5 及以后设置 `extended-keys-format csi-u`：tmux 只向已知具备 `extkeys` 特性的终端发送请求。`extkeys` 特性本身只为支持 CSI u 的终端声明 | 3.2 |
 | 回滚与状态栏 | `history-limit 50000`、`display-time 4000`、`status-interval 5`、`repeat-time 1000`、`display-panes-time 2000`、`set-titles on` | 任意 |
 | 窗口与窗格 | `base-index 1`、`pane-base-index 1`、`renumber-windows on`、`aggressive-resize on` | 第二项需要 1.6，第三项需要 1.7 |
 | 复制模式 | `$EDITOR` 或 `$VISUAL` 含有 `vi` 时为 `mode-keys vi`，否则为 `emacs`。`word-separators` 设为单个空格，因此双击会选中整个路径或 URL | 任意 |
