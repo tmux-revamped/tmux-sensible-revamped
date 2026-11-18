@@ -1,0 +1,21 @@
+#!/bin/sh
+set -u
+
+[ -z "${REVAMPED_TEST_UNAME_LOG:-}" ] || printf '%s\n' "$*" >>"${REVAMPED_TEST_UNAME_LOG}"
+[ "${REVAMPED_TEST_UNAME_FAIL:-0}" = 1 ] && exit 1
+case "${1:-}" in
+-s)
+  if [ -n "${REVAMPED_TEST_UNAME_S:-}" ]; then
+    printf '%s\n' "${REVAMPED_TEST_UNAME_S}"
+    exit 0
+  fi
+  ;;
+-m)
+  if [ -n "${REVAMPED_TEST_UNAME_M:-}" ]; then
+    printf '%s\n' "${REVAMPED_TEST_UNAME_M}"
+    exit 0
+  fi
+  ;;
+*) ;;
+esac
+exec /usr/bin/uname "$@"

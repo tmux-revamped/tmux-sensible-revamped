@@ -1,0 +1,3 @@
+$ sensible-revamped frobnicate
+sensible-revamped: unknown command 'frobnicate'. run 'sensible-revamped help' for usage.
+exit 1

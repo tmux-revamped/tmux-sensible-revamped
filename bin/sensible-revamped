@@ -1,0 +1,245 @@
+#!/bin/sh
+[ -n "${ZSH_VERSION:-}" ] && emulate sh
+set -eu
+
+sensible_revamped_self="$0"
+case "${sensible_revamped_self}" in
+*/*) ;;
+*) sensible_revamped_self="$(command -v -- "${sensible_revamped_self}")" ;;
+esac
+sensible_revamped_lib="$(cd "${sensible_revamped_self%/*}/../lib" && pwd)" || exit 1
+for sensible_revamped_inherited in $(env | sed -n -e 's/^\(REVAMPED_[A-Za-z0-9_]*\)=.*/\1/p' -e 's/^\(SENSIBLE_REVAMPED_[A-Za-z0-9_]*_LOADED\)=.*/\1/p'); do
+  case "${sensible_revamped_inherited}" in
+  REVAMPED_TEST_*) continue ;;
+  *) unset "${sensible_revamped_inherited}" ;;
+  esac
+done
+REVAMPED_LIB="${sensible_revamped_lib}"
+
+# shellcheck source=SCRIPTDIR/../lib/core.sh
+. "${REVAMPED_LIB}/core.sh"
+# shellcheck source=SCRIPTDIR/../lib/sensible.sh
+. "${REVAMPED_LIB}/sensible.sh"
+
+sensible_revamped_interface() {
+  # shellcheck disable=SC2034
+  REVAMPED_UI_NAME=sensible-revamped REVAMPED_UI_VERSION="${SENSIBLE_REVAMPED_VERSION}" REVAMPED_UI_TAGLINE="tmux defaults that leave your settings alone"
+  if [ -n "${SENSIBLE_REVAMPED_ACCENT:-}" ]; then
+    # shellcheck disable=SC2034
+    REVAMPED_UI_ACCENT_CHOICE="${SENSIBLE_REVAMPED_ACCENT}" REVAMPED_UI_ACCENT_NAME=SENSIBLE_REVAMPED_ACCENT
+  fi
+  # shellcheck source=SCRIPTDIR/../lib/cli.sh
+  . "${REVAMPED_LIB}/cli.sh"
+  # shellcheck source=SCRIPTDIR/../lib/doctor.sh
+  . "${REVAMPED_LIB}/doctor.sh"
+}
+
+sensible_revamped_usage() {
+  sensible_revamped_interface
+  revamped_cli_usage_error "$1"
+}
+
+sensible_revamped_help() {
+  revamped_cli_help_page <<'HELP'
+sensible-revamped - tmux defaults that leave the options you set alone
+
+usage:
+  sensible-revamped apply         set the defaults and bind the keys now
+  sensible-revamped list          print every tmux command apply would run
+  sensible-revamped resize-sync   turn aggressive-resize off while a
+                                  control-mode client is attached, and put it
+                                  back when the last one leaves
+  sensible-revamped doctor        check this machine
+  sensible-revamped version       print the version
+  sensible-revamped help          print this page
+
+options:
+  --json           list prints one JSON object
+  --theme NAME     the look: kodougu, catppuccin-mocha, catppuccin-latte,
+                   dracula, nord, gruvbox, tokyo-night or mono
+  --SETTING VALUE  any tmux option below, named with dashes, such as
+                   --keys off or --reload-key R
+
+environment:
+  SENSIBLE_REVAMPED_SETTING  any tmux option below in capitals, such as
+                             SENSIBLE_REVAMPED_KEYS
+  SENSIBLE_REVAMPED_THEME    the look, when --theme is not given
+  SENSIBLE_REVAMPED_ACCENT   a colour such as #CBA6F7 for the accent
+  KODOUGU_THEME              the family look, when neither is given
+  KODOUGU_ACCENT             the family accent, when the tool's is unset
+  NO_COLOR                   turn colour off
+  TERM, TERM_PROGRAM, COLORTERM, LC_TERMINAL
+                             the terminal, which decides truecolor, extended
+                             keys, sixel and hyperlinks; TERM and TERM_PROGRAM
+                             are the ones the tmux server started with
+  EDITOR, VISUAL             vi in either one turns copy-mode keys to vi
+  WAYLAND_DISPLAY, DISPLAY   decide between wl-copy and the X11 clipboard
+                             tools
+
+tmux options:
+  @sensible_revamped_keys             off skips the window keys, C-p, C-n and
+                                      the two below (on)
+  @sensible_revamped_last_window_key  a key for the last window (none)
+  @sensible_revamped_reload_key       a key that sources the config again
+                                      (none)
+  @revamped_theme                     the family look (kodougu)
+
+notes:
+  The entry point runs apply once when tmux loads the plugin. An option is
+  written only while it is empty or still at tmux's own default, a terminal
+  feature or override is added only when it is absent, and a key is bound
+  only when it is free, so loading twice changes nothing and your own
+  settings win. Every command goes to tmux in one call.
+
+examples:
+  sensible-revamped list
+  sensible-revamped --keys off apply
+  sensible-revamped doctor
+HELP
+}
+
+sensible_revamped_version() {
+  sensible_revamped_tmux=$(tmux -V 2>/dev/null) || sensible_revamped_tmux=missing
+  printf '%s %s\n' sensible-revamped "${SENSIBLE_REVAMPED_VERSION}"
+  printf 'tmux: %s\n' "${sensible_revamped_tmux#tmux }"
+}
+
+sensible_revamped_doctor_clipboard() {
+  sensible_revamped_doctor_clipboard_tool=$(sensible_revamped_clipboard)
+  if [ -n "${sensible_revamped_doctor_clipboard_tool}" ]; then
+    revamped_doctor_line clipboard ok "${sensible_revamped_doctor_clipboard_tool}"
+    return 0
+  fi
+  revamped_doctor_line clipboard warn "no clipboard tool, so a copy goes through the terminal with OSC 52"
+}
+
+sensible_revamped_doctor_terminfo() {
+  if revamped_has_command infocmp; then
+    sensible_revamped_doctor_terminfo_path=$(command -v infocmp)
+    revamped_doctor_line infocmp ok "${sensible_revamped_doctor_terminfo_path}"
+    return 0
+  fi
+  revamped_doctor_line infocmp warn "without it default-terminal stays screen-256color and truecolor needs COLORTERM"
+}
+
+sensible_revamped_doctor_keys() {
+  sensible_revamped_plan
+  if [ -n "${SENSIBLE_REVAMPED_SKIPPED}" ]; then
+    revamped_doctor_line keys warn "already bound and left alone: ${SENSIBLE_REVAMPED_SKIPPED}"
+    return 0
+  fi
+  revamped_doctor_line keys ok "every key it binds is free or its own"
+}
+
+sensible_revamped_doctor() {
+  revamped_doctor_tmux
+  sensible_revamped_doctor_clipboard
+  sensible_revamped_doctor_terminfo
+  sensible_revamped_doctor_keys
+  revamped_doctor_gum
+  revamped_doctor_core_tools awk sed grep tr
+  revamped_doctor_finish
+  [ "${REVAMPED_DOCTOR_MISSING}" -eq 0 ] || exit 1
+}
+
+sensible_revamped_list() {
+  sensible_revamped_plan
+  if [ -n "${sensible_revamped_json}" ]; then
+    sensible_revamped_json
+    return 0
+  fi
+  sensible_revamped_lines
+}
+
+sensible_revamped_apply_command() {
+  sensible_revamped_apply
+  sensible_revamped_sent=$(sensible_revamped_count)
+  printf 'Applied. %s commands went to tmux.\n' "${sensible_revamped_sent}"
+}
+
+sensible_revamped_menu() {
+  revamped_cli_require_terminal
+  sensible_revamped_choice=$(revamped_cli_menu "List the commands" "Apply them now" "Check this machine" "Help")
+  case "${sensible_revamped_choice}" in
+  "List the commands") sensible_revamped_list ;;
+  "Apply them now") sensible_revamped_apply_command ;;
+  "Check this machine") sensible_revamped_doctor ;;
+  *) sensible_revamped_help ;;
+  esac
+}
+
+sensible_revamped_dispatch() {
+  case "${1:-}" in
+  doctor) sensible_revamped_doctor ;;
+  version | --version | -V) sensible_revamped_version ;;
+  help | --help | -h) sensible_revamped_help ;;
+  list) sensible_revamped_list ;;
+  "") sensible_revamped_menu ;;
+  *) revamped_cli_usage_error "unknown command '$1'" ;;
+  esac
+}
+
+sensible_revamped_known() {
+  [ "$1" != --theme ] || return 0
+  sensible_revamped_known_name=$(sensible_revamped_setting_name "$1")
+  [ -n "${sensible_revamped_known_name}" ] || sensible_revamped_usage "unknown option '$1'"
+}
+
+sensible_revamped_set() {
+  sensible_revamped_set_upper=$(printf '%s\n' "$1" | tr '[:lower:]' '[:upper:]')
+  export "SENSIBLE_REVAMPED_${sensible_revamped_set_upper}=$2"
+}
+
+sensible_revamped_option() {
+  sensible_revamped_option_name=$(sensible_revamped_setting_name "$1")
+  [ -n "${sensible_revamped_option_name}" ] || sensible_revamped_usage "unknown option '$1'"
+  sensible_revamped_set "${sensible_revamped_option_name}" "$2"
+}
+
+sensible_revamped_main() {
+  sensible_revamped_theme="${SENSIBLE_REVAMPED_THEME:-}" sensible_revamped_json="" sensible_revamped_left=$# sensible_revamped_rest=0
+  while [ "${sensible_revamped_left}" -gt 0 ]; do
+    sensible_revamped_arg="$1"
+    shift
+    sensible_revamped_left=$((sensible_revamped_left - 1))
+    case "${sensible_revamped_rest}:${sensible_revamped_arg}" in
+    1:*) set -- "$@" "${sensible_revamped_arg}" ;;
+    0:--) sensible_revamped_rest=1 ;;
+    0:--json) sensible_revamped_json=1 ;;
+    0:-h | 0:-V | 0:--help | 0:--version) set -- "$@" "${sensible_revamped_arg}" ;;
+    0:--theme=*) sensible_revamped_theme="${sensible_revamped_arg#--theme=}" ;;
+    0:--*=*) sensible_revamped_option "${sensible_revamped_arg%%=*}" "${sensible_revamped_arg#*=}" ;;
+    0:--*)
+      sensible_revamped_known "${sensible_revamped_arg}"
+      [ "${sensible_revamped_left}" -gt 0 ] || sensible_revamped_usage "option '${sensible_revamped_arg}' needs a value"
+      if [ "${sensible_revamped_arg}" = --theme ]; then
+        sensible_revamped_theme="$1"
+      else
+        sensible_revamped_option "${sensible_revamped_arg}" "$1"
+      fi
+      shift
+      sensible_revamped_left=$((sensible_revamped_left - 1))
+      ;;
+    0:-?*) sensible_revamped_usage "unknown option '${sensible_revamped_arg}'" ;;
+    *) set -- "$@" "${sensible_revamped_arg}" ;;
+    esac
+  done
+  sensible_revamped_run "${sensible_revamped_theme}" "$@"
+}
+
+sensible_revamped_run() {
+  sensible_revamped_run_theme="$1"
+  shift
+  [ -z "${sensible_revamped_json}" ] || [ "${1:-}" = list ] || sensible_revamped_usage "option '--json' works only with list"
+  case "${1:-}" in
+  apply) sensible_revamped_apply ;;
+  resize-sync) sensible_revamped_resize_sync ;;
+  *)
+    sensible_revamped_interface
+    revamped_cli_start "${sensible_revamped_run_theme}"
+    sensible_revamped_dispatch "$@"
+    ;;
+  esac
+}
+
+sensible_revamped_main "$@"

@@ -1,0 +1,56 @@
+$ sensible-revamped help
+sensible-revamped - tmux defaults that leave the options you set alone
+
+usage:
+  sensible-revamped apply         set the defaults and bind the keys now
+  sensible-revamped list          print every tmux command apply would run
+  sensible-revamped resize-sync   turn aggressive-resize off while a
+                                  control-mode client is attached, and put it
+                                  back when the last one leaves
+  sensible-revamped doctor        check this machine
+  sensible-revamped version       print the version
+  sensible-revamped help          print this page
+
+options:
+  --json           list prints one JSON object
+  --theme NAME     the look: kodougu, catppuccin-mocha, catppuccin-latte,
+                   dracula, nord, gruvbox, tokyo-night or mono
+  --SETTING VALUE  any tmux option below, named with dashes, such as
+                   --keys off or --reload-key R
+
+environment:
+  SENSIBLE_REVAMPED_SETTING  any tmux option below in capitals, such as
+                             SENSIBLE_REVAMPED_KEYS
+  SENSIBLE_REVAMPED_THEME    the look, when --theme is not given
+  SENSIBLE_REVAMPED_ACCENT   a colour such as #CBA6F7 for the accent
+  KODOUGU_THEME              the family look, when neither is given
+  KODOUGU_ACCENT             the family accent, when the tool's is unset
+  NO_COLOR                   turn colour off
+  TERM, TERM_PROGRAM, COLORTERM, LC_TERMINAL
+                             the terminal, which decides truecolor, extended
+                             keys, sixel and hyperlinks; TERM and TERM_PROGRAM
+                             are the ones the tmux server started with
+  EDITOR, VISUAL             vi in either one turns copy-mode keys to vi
+  WAYLAND_DISPLAY, DISPLAY   decide between wl-copy and the X11 clipboard
+                             tools
+
+tmux options:
+  @sensible_revamped_keys             off skips the window keys, C-p, C-n and
+                                      the two below (on)
+  @sensible_revamped_last_window_key  a key for the last window (none)
+  @sensible_revamped_reload_key       a key that sources the config again
+                                      (none)
+  @revamped_theme                     the family look (kodougu)
+
+notes:
+  The entry point runs apply once when tmux loads the plugin. An option is
+  written only while it is empty or still at tmux's own default, a terminal
+  feature or override is added only when it is absent, and a key is bound
+  only when it is free, so loading twice changes nothing and your own
+  settings win. Every command goes to tmux in one call.
+
+examples:
+  sensible-revamped list
+  sensible-revamped --keys off apply
+  sensible-revamped doctor
+exit 0

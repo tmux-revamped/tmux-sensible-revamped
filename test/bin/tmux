@@ -1,0 +1,112 @@
+#!/bin/sh
+{ set +x; } 2>/dev/null
+set -u
+
+store="${REVAMPED_TEST_TMUX_DIR:?}"
+[ -z "${REVAMPED_TEST_TMUX_LOG:-}" ] || printf '%s\n' "$*" >>"${REVAMPED_TEST_TMUX_LOG}"
+if [ -n "${REVAMPED_TEST_TMUX_ARGV:-}" ] && [ "${1:-}" != list-clients ]; then
+  argv_line=""
+  for argv_word in "$@"; do
+    argv_line="${argv_line}${argv_line:+|}${argv_word}"
+  done
+  printf '%s\n' "${argv_line}" >>"${REVAMPED_TEST_TMUX_ARGV}"
+fi
+[ "${REVAMPED_TEST_TMUX_FAIL:-0}" = 1 ] && exit 1
+
+key() {
+  key_name=$(printf '%s' "$1" | tr -c 'A-Za-z0-9_.-' '_')
+  printf '%s/%s' "${store}" "${key_name}"
+}
+
+expand_options() {
+  printf '%s\n' "$1" | REVAMPED_TEST_TMUX_STORE="${store}" awk '{
+    line = $0
+    out = ""
+    while ((at = index(line, "#{@")) > 0) {
+      out = out substr(line, 1, at - 1)
+      line = substr(line, at + 2)
+      close_at = index(line, "}")
+      name = substr(line, 1, close_at - 1)
+      line = substr(line, close_at + 1)
+      file = "g.-." name
+      gsub(/[^A-Za-z0-9_.-]/, "_", file)
+      file = ENVIRON["REVAMPED_TEST_TMUX_STORE"] "/" file
+      value = ""
+      count = 0
+      while ((getline row < file) > 0) {
+        value = value (count++ ? "\n" : "") row
+      }
+      close(file)
+      out = out value
+    }
+    print out line
+  }'
+}
+
+if [ "${1:-}" = -V ]; then
+  printf 'tmux %s\n' "${REVAMPED_TEST_TMUX_VERSION:-3.6}"
+  exit 0
+fi
+verb="${1:-}"
+[ "$#" -gt 0 ] && shift
+scope=g
+target=-
+unset_option=0
+append=0
+value_only=0
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+  -t)
+    target="$2"
+    shift 2
+    ;;
+  -*)
+    case "$1" in *w*) scope=w ;; *p*) scope=p ;; *) ;; esac
+    case "$1" in *u*) unset_option=1 ;; *) ;; esac
+    case "$1" in *v*) value_only=1 ;; *) ;; esac
+    case "$1" in *a*) append=1 ;; *) ;; esac
+    shift
+    ;;
+  *) break ;;
+  esac
+done
+
+case "${verb}" in
+set-option)
+  file="$(key "${scope}.${target}.$1")"
+  if [ "${unset_option}" = 1 ]; then
+    rm -f "${file}"
+  elif [ "${append}" = 1 ]; then
+    printf '%s' "${2:-}" >>"${file}"
+  else
+    printf '%s' "${2:-}" >"${file}"
+  fi
+  ;;
+show-option)
+  file="$(key "${scope}.${target}.$1")"
+  [ -f "${file}" ] || exit 0
+  if [ "${value_only}" = 1 ]; then
+    cat "${file}"
+    printf '\n'
+  else
+    stored=$(cat "${file}")
+    printf '%s "%s"\n' "$1" "${stored}"
+  fi
+  ;;
+list-clients)
+  [ -f "${store}/clients" ] && cat "${store}/clients"
+  ;;
+display-message)
+  file="$(key "display.${target}.$1")"
+  if [ -f "${file}" ]; then
+    cat "${file}"
+  else
+    case "$1" in
+    *'#{@'*) expand_options "$1" ;;
+    *) ;;
+    esac
+  fi
+  ;;
+*) ;;
+esac
+exit 0

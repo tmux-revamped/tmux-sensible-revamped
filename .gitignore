@@ -2,4 +2,7 @@
 *.tmp
 /tmp/
 /coverage/
+coverage-*.json
+vendor/
+.bundle/
 .DS_Store

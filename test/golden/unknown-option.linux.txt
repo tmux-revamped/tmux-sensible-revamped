@@ -1,0 +1,3 @@
+$ sensible-revamped --frobnicate
+sensible-revamped: unknown option '--frobnicate'. run 'sensible-revamped help' for usage.
+exit 1

@@ -4,32 +4,117 @@
 
 <strong>按 tmux 版本和终端区分的合理默认设置，不改动你自己设置的选项。</strong>
 
-[English](README.md) | [日本語](README.ja.md) | 简体中文 | [繁體中文（香港）](README.zh-HK.md)
+[English](README.md) &nbsp;|&nbsp; [日本語](README.ja.md) &nbsp;|&nbsp; 简体中文 &nbsp;|&nbsp; [繁體中文（香港）](README.zh-HK.md)
 
-[![family](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/family.yml?branch=main&style=flat-square&label=family)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/family.yml)
-[![tests](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml)
+[![ci](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=release)](https://github.com/tmux-revamped/tmux-sensible-revamped/releases/latest)
 [![openssf scorecard](https://img.shields.io/ossf-scorecard/github.com/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=openssf%20scorecard)](https://scorecard.dev/viewer/?uri=github.com/tmux-revamped/tmux-sensible-revamped)
 [![license](https://img.shields.io/github/license/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=license)](LICENSE)
 
 <p align="center">
-  <a href="#功能">功能</a> |
-  <a href="#环境要求">环境要求</a> |
-  <a href="#安装">安装</a> |
-  <a href="#配置">配置</a> |
-  <a href="#快捷键">快捷键</a> |
-  <a href="#工作原理">工作原理</a>
+  <a href="#快速开始"><strong>快速开始</strong></a> &nbsp;|&nbsp;
+  <a href="#用法">用法</a> &nbsp;|&nbsp;
+  <a href="#设置的内容">设置的内容</a> &nbsp;|&nbsp;
+  <a href="#快捷键">快捷键</a> &nbsp;|&nbsp;
+  <a href="#工作原理">工作原理</a> &nbsp;|&nbsp;
+  <a href="#界面">界面</a>
 </p>
 
 </div>
 
-**22** 个 tmux 选项，只在仍为 tmux 默认值时才设置。**11** 个终端能力条目，每个只追加一次。每个选项只在具备它的 tmux 版本上应用，范围从 **1.9** 起。
+<p align="center">
+  <img src="screens/hero.gif" alt="sensible-revamped 用一条命令调高 tmux 的默认值，再用 prefix C-n 和 C-p 切换窗口" width="800">
+</p>
+
+```console
+$ tmux show-option -gv history-limit
+2000
+$ sensible-revamped apply
+$ tmux show-option -gv history-limit
+50000
+```
+
+本插件替你完成大多数 tmux 用户最终都会手写的默认设置：去掉 ESC 延迟、加大回滚缓冲区、窗口从 1 开始编号、启用真彩色，以及把复制内容送到系统剪贴板。每项设置在应用前都会检查正在运行的 tmux 版本和外层终端。你的 tmux 没有的选项会被跳过。
 
 ---
 
-## 功能
+## 快速开始
 
-本插件替你完成大多数 tmux 用户最终都会手写的默认设置：去掉 ESC 延迟、加大回滚缓冲区、窗口从 1 开始编号、启用真彩色，以及把复制内容送到系统剪贴板。每项设置在应用前都会检查正在运行的 tmux 版本和外层终端。你的 tmux 没有的选项会被跳过。
+### 前提条件
+
+| 工具 | 版本 | 用途 |
+|:-----|:--------|:---------|
+| tmux | 3.2 或更高 | 家族的最低版本；正在运行的 tmux 没有的选项会被跳过 |
+| 剪贴板工具 | 可选 | `wl-copy`、`termux-clipboard-set`、`pbcopy`、`xclip`、`xsel` 或 `clip.exe`；没有时复制经由终端的 OSC 52 |
+| `infocmp` | 可选 | 为 `default-terminal` 选择 `tmux-direct` 或 `tmux-256color`；没有时取 `screen-256color` |
+| gum | 可选 | `sensible-revamped` 的菜单、表格和颜色；没有它，所有命令都输出纯文本 |
+
+### 安装
+
+```tmux
+set -g @plugin 'tmux-revamped/tmux-sensible-revamped'
+```
+
+然后按 `prefix + I`。不用 TPM 时，克隆仓库，并在 `~/.tmux.conf` 中运行它的入口文件：
+
+```bash
+git clone https://github.com/tmux-revamped/tmux-sensible-revamped ~/.tmux/plugins/tmux-sensible-revamped
+```
+
+```tmux
+run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
+```
+
+在克隆的目录中运行 `make install`，还会把 `sensible-revamped` 放进 `~/.local/bin`，把它的 man 手册和补全放在 `~/.local/share` 下。
+
+### 验证
+
+```bash
+~/.tmux/plugins/tmux-sensible-revamped/bin/sensible-revamped doctor
+```
+
+## 用法
+
+无需调用任何东西。重新加载 tmux 后检查其中一个值：
+
+```bash
+tmux show-option -gv history-limit
+```
+
+```text
+50000
+```
+
+若想对表中某个选项使用自己的值，在 `~/.tmux.conf` 中设置即可。插件写入前会把每个选项与 tmux 默认值比较，不同的值保持不动。你设置的值若恰好等于 tmux 默认值，就无法与未设置区分，插件会将其替换。
+
+| 命令 | 作用 |
+|:--------|:-------------|
+| `sensible-revamped apply` | 立即设置默认值并绑定按键；插件加载时入口点会运行它 |
+| `sensible-revamped list` | 打印 `apply` 会运行的每条 tmux 命令，不做任何修改；`--json` 输出一个对象 |
+| `sensible-revamped resize-sync` | 有控制模式客户端连接时关闭 `aggressive-resize`，之后再恢复；由客户端钩子运行 |
+| `sensible-revamped doctor` | 每个依赖一行，包括剪贴板工具和保持不动的按键 |
+| `sensible-revamped version` | 版本，然后是 tmux 版本 |
+| `sensible-revamped help` | 帮助页；`man sensible-revamped` 记录相同的命令和设置 |
+| `sensible-revamped` | 在终端上显示菜单 |
+
+| 选项 | 默认值 | 含义 |
+|:-------|:--------|:--------|
+| `@sensible_revamped_keys` | `on` | 设为 `off` 时跳过重新加载、上一个窗口、`C-p` 和 `C-n` 的绑定。前缀键设置和复制模式的绑定仍会应用 |
+| `@sensible_revamped_reload_key` | 空 | 重新加载配置的前缀键。设置之前不绑定 |
+| `@sensible_revamped_last_window_key` | 空 | 切换到上一个窗口的前缀键。设置之前不绑定 |
+
+```tmux
+set -g @sensible_revamped_reload_key 'R'
+set -g @sensible_revamped_last_window_key 'a'
+```
+
+重新加载键会加载 `$XDG_CONFIG_HOME/tmux/tmux.conf`、`~/.config/tmux/tmux.conf` 和 `~/.tmux.conf` 中第一个存在的文件，然后显示 `tmux-sensible-revamped: reloaded`。
+
+每个选项也可以用带连字符的命令选项（例如 `--reload-key R`）和环境变量（例如 `SENSIBLE_REVAMPED_RELOAD_KEY`）设置；命令行优先于环境变量，环境变量优先于 tmux 选项。空的 tmux 选项表示使用默认值。`@sensible_revamped_resize_saved` 由插件自己写入。
+
+<a id="设置的内容"></a>
+
+## 设置的内容
 
 | 方面 | 设置 | 最低 tmux 版本 |
 |:-----|:---------|:-------------|
@@ -47,72 +132,9 @@
 
 视为支持 CSI u 的终端有 xterm、kitty、foot、Alacritty、Contour、Rio、st、Konsole、iTerm2、WezTerm、Ghostty 和 mintty，根据 `TERM` 和 `TERM_PROGRAM` 判断。
 
-## 环境要求
+这里的终端是 tmux 服务器启动时所在的终端：tmux 交给插件的是它自己的 `TERM` 和 `TERM_PROGRAM`，所以插件从 tmux 的全局环境读取这两个值。
 
-| 工具 | 版本 | 说明 |
-|:-----|:--------|:------|
-| tmux | 1.9 或更高 | 比正在运行的 tmux 更新的选项会被跳过 |
-| bash | 3.2 或更高 | 可用 macOS 的 `/bin/bash` |
-| 剪贴板工具 | 可选 | `wl-copy`、`termux-clipboard-set`、`pbcopy`、`xclip`、`xsel` 或 `clip.exe`。没有时通过 OSC 52 复制 |
-
-CI 在 Ubuntu LTS 的 x86_64 和 arm64 上使用 GNU 和 uutils coreutils 运行测试，在 macOS 的 Apple Silicon 和 Intel 上使用系统工具、GNU 工具和 uutils 运行测试。
-
-## 安装
-
-使用 [TPM](https://github.com/tmux-plugins/tpm) 时，把下面这行加入 `~/.tmux.conf`，然后按 `prefix + I`：
-
-```tmux
-set -g @plugin 'tmux-revamped/tmux-sensible-revamped'
-```
-
-TPM 会在读完其余配置之后加载插件，所以这行放在哪里都可以。
-
-不使用 TPM 时，克隆仓库并在配置中运行入口脚本：
-
-```bash
-git clone https://github.com/tmux-revamped/tmux-sensible-revamped ~/.tmux/plugins/tmux-sensible-revamped
-```
-
-```tmux
-run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
-```
-
-## 用法
-
-无需调用任何东西。重新加载 tmux 后检查其中一个值：
-
-```bash
-tmux show-option -gv history-limit
-```
-
-```text
-50000
-```
-
-若想对表中某个选项使用自己的值，在 `~/.tmux.conf` 中设置即可。插件写入前会把每个选项与 tmux 默认值比较，不同的值保持不动。你设置的值若恰好等于 tmux 默认值，就无法与未设置区分，插件会将其替换。
-
-## 配置
-
-| 选项 | 默认值 | 含义 |
-|:-------|:--------|:--------|
-| `@sensible_revamped_keys` | `on` | 设为 `off` 时跳过重新加载、上一个窗口、`C-p` 和 `C-n` 的绑定。前缀键设置和复制模式的绑定仍会应用 |
-| `@sensible_revamped_reload_key` | 空 | 重新加载配置的前缀键。设置之前不绑定 |
-| `@sensible_revamped_last_window_key` | 空 | 切换到上一个窗口的前缀键。设置之前不绑定 |
-
-```tmux
-set -g @sensible_revamped_reload_key 'R'
-set -g @sensible_revamped_last_window_key 'a'
-```
-
-重新加载键会加载 `$XDG_CONFIG_HOME/tmux/tmux.conf`、`~/.config/tmux/tmux.conf` 和 `~/.tmux.conf` 中第一个存在的文件，然后显示 `tmux-sensible-revamped: reloaded`。
-
-### 内部状态
-
-该选项由插件自行管理，请勿设置。
-
-| 选项 | 保存内容 |
-|:-------|:------|
-| `@sensible_revamped_resize_saved` | 有控制模式客户端连接期间保存的全局 `aggressive-resize` 值。最后一个控制模式客户端离开时恢复并删除 |
+<a id="快捷键"></a>
 
 ## 快捷键
 
@@ -133,9 +155,11 @@ set -g @sensible_revamped_last_window_key 'a'
 
 剪贴板工具按以下顺序选择：Wayland 下的 `wl-copy`、`termux-clipboard-set`、macOS 上的 `pbcopy`、X11 下先 `xclip` 后 `xsel`，以及 WSL 上的 `clip.exe`。`clip.exe` 排在 X11 工具之后，使 WSLg 会话保持 UTF-8 正确。在 macOS 上，若安装了 `reattach-to-user-namespace`，`default-command` 会通过它启动你的 shell。
 
+<a id="工作原理"></a>
+
 ## 工作原理
 
-[`sensible-revamped.tmux`](sensible-revamped.tmux) 在加载时运行一次 [`src/sensible.sh`](src/sensible.sh)。该脚本读取 tmux 版本、操作系统、`TERM`、`TERM_PROGRAM` 和 `COLORTERM`，然后通过以下三种保护之一写入每项设置：
+[`sensible-revamped.tmux`](sensible-revamped.tmux) 在加载时运行一次 `bin/sensible-revamped apply`。它用三次 tmux 调用读取 tmux 版本、可能修改的每个选项、按键表和终端，再用第四次调用发送所有命令，每条命令都经过以下三种保护之一：
 
 | 保护 | 规则 |
 |:------|:-----|
@@ -143,17 +167,85 @@ set -g @sensible_revamped_last_window_key 'a'
 | 只追加一次 | `terminal-overrides` 或 `terminal-features` 的条目只在缺失时添加，因此重新加载不会让列表变长 |
 | 空闲键检查 | 只在 `tmux list-keys` 显示该键没有绑定时才绑定便捷键 |
 
-在 tmux 3.0 及以后，`client-attached` 和 `client-detached` 钩子会以 `--resize-sync` 调用该脚本。只要有 iTerm2 控制模式客户端连接，钩子就保存全局 `aggressive-resize` 的值并将其关闭，因为开启时控制模式会出问题。最后一个控制模式客户端离开后，恢复保存的值。普通客户端连接不会改变任何东西。
+在 tmux 3.0 及以后，`client-attached` 和 `client-detached` 钩子会运行 `sensible-revamped resize-sync`。只要有 iTerm2 控制模式客户端连接，钩子就保存全局 `aggressive-resize` 的值并将其关闭，因为开启时控制模式会出问题。最后一个控制模式客户端离开后，恢复保存的值。普通客户端连接不会改变任何东西。
 
-判断逻辑以纯函数形式放在 [`src/lib/sensible/sensible.sh`](src/lib/sensible/sensible.sh) 中。设置 `SENSIBLE_DRY_RUN` 后，应用程序会打印每条 tmux 命令而不执行，测试正是借此覆盖各版本组合。
+`sensible-revamped list` 打印 `apply` 会运行的每条命令而不做任何修改，可以用它查看插件在你的服务器上会做什么。
+
+<a id="界面"></a>
+
+## 界面
+
+<details>
+<summary>所有界面，在真实的 tmux 中用 <code>make screens</code> 录制，每个按键显示在状态栏上</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="screens/defaults.png" alt="sensible-revamped：apply 调高 tmux 自带的默认值"><br><sub><code>apply</code> 调高 tmux 自带的默认值，来自 <code>hero.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/next-window.png" alt="sensible-revamped：prefix C-n 切换到下一个窗口"><br><sub><code>prefix C-n</code> 切换到下一个窗口，来自 <code>hero.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu.png" alt="sensible-revamped：菜单"><br><sub>菜单，来自 <code>hero.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/doctor.png" alt="sensible-revamped：doctor"><br><sub><code>doctor</code>，来自 <code>hero.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/reload.png" alt="sensible-revamped：重新加载键再次加载配置"><br><sub>重新加载键再次加载配置，来自 <code>keys.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/last-window.png" alt="sensible-revamped：回到上一个窗口的按键"><br><sub>回到上一个窗口的按键，来自 <code>keys.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy.png" alt="sensible-revamped：在 vi 复制模式中用 v 选择"><br><sub>在 vi 复制模式中用 <code>v</code> 选择，来自 <code>keys.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/copied.png" alt="sensible-revamped：y 复制到剪贴板工具"><br><sub><code>y</code> 复制到剪贴板工具，来自 <code>keys.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/list.png" alt="sensible-revamped：list 打印每条命令"><br><sub><code>list</code> 打印每条命令，来自 <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/plain-menu.png" alt="sensible-revamped：没有 gum 的菜单"><br><sub>没有 gum 的菜单，来自 <code>stills.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-doctor.png" alt="sensible-revamped：从菜单运行 doctor"><br><sub>从菜单运行 <code>doctor</code>，来自 <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/version.png" alt="sensible-revamped：版本"><br><sub>版本，来自 <code>stills.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/error.png" alt="sensible-revamped：未知命令"><br><sub>未知命令，来自 <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/themes.png" alt="sensible-revamped：六种主题下的标题"><br><sub>六种主题下的标题，来自 <code>themes.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/help.png" alt="sensible-revamped：帮助页"><br><sub>帮助页，来自 <code>help.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/accent.png" alt="sensible-revamped：来自 SENSIBLE_REVAMPED_ACCENT 的强调色"><br><sub>来自 <code>SENSIBLE_REVAMPED_ACCENT</code> 的强调色，来自 <code>stills.tape</code></sub></td>
+</tr>
+</table>
+
+</details>
+
+## 可移植性
+
+插件是 POSIX `sh`。CI 在下面每一行上运行全部测试。
+
+| Shell | 状态 |
+|:------|:-------|
+| `dash`、macOS 上的 `/bin/sh` | 支持 |
+| `bash` 3.2 和 5.x、系统自带的 `zsh` 和 Homebrew 的 `zsh` | 支持 |
+
+| 系统 | 状态 |
+|:-------|:-------|
+| macOS | Apple Silicon 和 Intel 上的 Tahoe，使用系统自带的工具、Homebrew 的 GNU 工具和 Homebrew 的 uutils |
+| Linux | x86_64 和 arm64 上的 Ubuntu 26.04，使用 GNU coreutils、uutils 和 BusyBox |
 
 ## 开发
 
 | 命令 | 运行内容 |
 |:--------|:-------------|
-| `make test` | bats 测试套件 |
-| `make lint` | 对所有 shell 文件运行 warning 级别的 shellcheck |
-| `make coverage` | kcov 行覆盖率，下限 95%，仅 Linux |
+| `make fmt` | 对每个脚本运行 shfmt `-i 2` |
+| `make lint` | shfmt、ShellCheck、mandoc、yamllint 和 actionlint，零告警 |
+| `make test` | 在系统 `sh` 下运行 bats 测试 |
+| `make test-all` | 在每个已安装的 shell 下运行测试，macOS 上包括 bash 和 zsh 的两种构建 |
+| `make test-linux` | 在 Ubuntu 容器中运行测试 |
+| `make coverage` | 在这台 Mac 和 Ubuntu 容器中运行 bashcov，合并后以 100% 为门槛 |
+| `make screens` | 用 VHS 在 tmux 中从真实插件录制上面的界面，在 macOS 上运行 |
+| `make install` | 把命令、man 手册和补全安装到 `PREFIX` 下 |
+
+在 macOS 上，运行 `brew bundle` 会根据 [`Brewfile`](Brewfile) 安装这些目标用到的所有工具。
+
+提交遵循 Conventional Commits 格式，直接进入 `main`。`main` 上的 `ci` 通过后，`release.yml` 运行 semantic-release：自上一个标签以来的每个 `feat` 或 `fix` 都会发布新版本，更新版本常量，并把说明写进 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ## 许可证
 

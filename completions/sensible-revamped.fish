@@ -1,0 +1,12 @@
+complete -c sensible-revamped -f
+complete -c sensible-revamped -n __fish_use_subcommand -a apply -d 'set the defaults and bind the keys now'
+complete -c sensible-revamped -n __fish_use_subcommand -a list -d 'print every tmux command apply would run'
+complete -c sensible-revamped -n __fish_use_subcommand -a resize-sync -d 'follow control-mode clients with aggressive-resize'
+complete -c sensible-revamped -n __fish_use_subcommand -a doctor -d 'check this machine'
+complete -c sensible-revamped -n __fish_use_subcommand -a version -d 'print the version'
+complete -c sensible-revamped -n __fish_use_subcommand -a help -d 'print the help page'
+complete -c sensible-revamped -l json -d 'list prints one JSON object'
+complete -c sensible-revamped -l theme -r -a 'kodougu catppuccin-mocha catppuccin-latte dracula nord gruvbox tokyo-night mono' -d 'colours of the terminal interface'
+complete -c sensible-revamped -l keys -r -a 'on off' -d 'bind the window keys'
+complete -c sensible-revamped -l last-window-key -r -d 'a key for the last window'
+complete -c sensible-revamped -l reload-key -r -d 'a key that sources the config again'

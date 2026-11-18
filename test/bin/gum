@@ -1,0 +1,52 @@
+#!/bin/sh
+{ set +x; } 2>/dev/null
+set -eu
+
+log="${REVAMPED_TEST_GUM_LOG:-/dev/null}"
+printf '%s\n' "$*" >>"${log}"
+
+next_answer() {
+  answers="${REVAMPED_TEST_GUM_ANSWERS:-}"
+  [ -n "${answers}" ] && [ -f "${answers}" ] || exit 130
+  used="${answers}.used"
+  count=$(($(cat "${used}" 2>/dev/null || printf 0) + 1))
+  printf '%s\n' "${count}" >"${used}"
+  line=$(sed -n "${count}p" "${answers}")
+  [ "${line}" != "<cancel>" ] || exit 130
+  printf '%s\n' "${line}" | awk '{ gsub(/\\n/, "\n"); print }'
+}
+
+after_dashes() {
+  while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+    shift
+  done
+  [ $# -gt 0 ] && shift
+  printf '%s\n' "$@"
+}
+
+command="${1:-}"
+[ $# -gt 0 ] && shift
+case "${command}" in
+--version) printf 'gum version 0.0.0-shim\n' ;;
+choose | input | write | filter) next_answer ;;
+confirm)
+  reply=$(next_answer)
+  [ "${reply}" = "yes" ]
+  ;;
+style) after_dashes "$@" ;;
+join)
+  [ "${1:-}" = "--horizontal" ] && shift && printf '%s' "$@" && printf '\n' && exit 0
+  [ "${1:-}" = "--vertical" ] && shift
+  printf '%s\n' "$@"
+  ;;
+format) cat ;;
+spin)
+  [ "${REVAMPED_TEST_GUM_SPIN:-}" != "cancel" ] || exit 130
+  while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+    shift
+  done
+  shift
+  "$@"
+  ;;
+*) exit 2 ;;
+esac

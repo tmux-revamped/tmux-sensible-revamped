@@ -1,45 +1,67 @@
-.PHONY: test test-unit coverage lint clean help
+SHELL := /bin/sh
+PREFIX ?= $(HOME)/.local
+TOOL = sensible-revamped
+SCRIPTS = $(shell git ls-files --cached --others --exclude-standard -- '*.sh' '*.bash' '*.bats' '*.tmux' 'bin/*' 'test/bin/*')
+POSIX_SCRIPTS = $(shell git ls-files --cached --others --exclude-standard -- 'bin/*' 'lib/*.sh' '*.tmux' '.github/scripts/*.sh' 'test/*.sh' 'test/bin/*' 'screens/*.sh')
+TEST_SCRIPTS = $(shell git ls-files --cached --others --exclude-standard -- 'test/*.bash' 'test/*.bats')
 
-SHELL := /usr/bin/env bash
-BATS := $(shell command -v bats 2>/dev/null || echo "bats")
-SHELLCHECK := $(shell command -v shellcheck 2>/dev/null || echo "shellcheck")
-KCOV := $(shell command -v kcov 2>/dev/null || echo "kcov")
-COVERAGE_MIN ?= 95
-COVERAGE_EXCLUDE ?=
-LINT_EXCLUDE ?=
-CLEAN_EXTRA ?=
+.PHONY: help fmt lint test test-all test-linux coverage check screens install clean
 
--include Makefile.local
+help:
+	@echo "targets:"
+	@echo "  fmt         format every script with shfmt -i 2"
+	@echo "  lint        shfmt, ShellCheck, mandoc, yamllint and actionlint at zero findings"
+	@echo "  test        the bats suites under the system sh"
+	@echo "  test-all    the bats suites under every installed shell, both builds of bash and zsh on macOS"
+	@echo "  test-linux  the bats suites in an Ubuntu container"
+	@echo "  coverage    bashcov on this Mac and in the Ubuntu container, merged, gate 100%"
+	@echo "  check       lint and test"
+	@echo "  screens     the README screens, recorded from the real tool with VHS, on macOS"
+	@echo "  install     the tool, its man page and completions under PREFIX, ~/.local by default"
+	@echo "  clean       remove the coverage output"
 
-help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+fmt:
+	shfmt -i 2 -w $(SCRIPTS)
 
-test: ## Run the full test suite
-	@$(BATS) --recursive test/
+lint:
+	shfmt -i 2 -d $(SCRIPTS)
+	shellcheck -x -o all -s sh $(POSIX_SCRIPTS)
+	shellcheck -x -o all $(TEST_SCRIPTS) completions/$(TOOL).bash
+	zsh -n completions/_$(TOOL)
+	mandoc -T lint -W warning man/$(TOOL).1
+	yamllint -s -c .yamllint.yml .github .yamllint.yml
+	actionlint
 
-test-unit: ## Run unit tests only
-	@$(BATS) --recursive test/lib/
+test:
+	REVAMPED_TEST_SHELLS=sh sh test/run-matrix.sh
 
-coverage: ## Measure line coverage with kcov and enforce COVERAGE_MIN (Linux)
-	@command -v kcov >/dev/null 2>&1 || { \
-		echo "kcov is not installed. On Ubuntu: sudo apt-get install -y kcov"; exit 1; }
-	@rm -rf coverage
-	@$(KCOV) "--include-path=$(CURDIR)/src" $(COVERAGE_EXCLUDE) \
-		coverage "$(BATS)" --recursive test/ >/dev/null
-	@percent=$$(python3 -c "import json,glob; \
-files=glob.glob('coverage/kcov-merged/coverage.json') or glob.glob('coverage/*/coverage.json'); \
-data=json.load(open(sorted(files)[-1])) if files else {}; \
-print(data.get('percent_covered', '0'))"); \
-	echo "Line coverage: $$percent% (min $(COVERAGE_MIN)%)"; \
-	awk -v p="$$percent" -v m="$(COVERAGE_MIN)" 'BEGIN { exit (p+0 >= m+0) ? 0 : 1 }' || \
-		{ echo "Coverage below $(COVERAGE_MIN)%"; exit 1; }
+test-all:
+	sh test/run-matrix.sh
 
-lint: ## Run shellcheck on all shell files
-	@{ find . -type f \( -name "*.sh" -o -name "*.tmux" -o -name "*.bash" \) \
-		-not -path "./.git/*" -not -path "./coverage/*" $(LINT_EXCLUDE); } | sort | \
-		xargs $(SHELLCHECK) --severity=warning --shell=bash
+test-linux:
+	sh test/linux-container.sh sh test/run-matrix.sh
 
-clean: ## Remove coverage and temp artifacts
-	@rm -rf coverage $(CLEAN_EXTRA)
-	@echo "Cleaned."
+coverage:
+	sh .github/scripts/coverage.sh && cp -f coverage/.resultset.json coverage-macos.json
+	sh test/linux-container.sh sh .github/scripts/linux-coverage.sh
+	python3 .github/scripts/coverage-gate.py '/(lib/[a-z]+\.sh|bin/[a-z-]+)\Z' 100 coverage-macos.json coverage-linux.json
+
+check: lint test
+
+screens:
+	sh screens/record.sh
+
+install:
+	mkdir -p "$(PREFIX)/share/$(TOOL)" "$(PREFIX)/bin" "$(PREFIX)/share/man/man1" "$(PREFIX)/share/bash-completion/completions" "$(PREFIX)/share/zsh/site-functions" "$(PREFIX)/share/fish/vendor_completions.d"
+	rm -rf "$(PREFIX)/share/$(TOOL)/bin" "$(PREFIX)/share/$(TOOL)/lib"
+	cp -R bin lib "$(PREFIX)/share/$(TOOL)/"
+	cp -f man/$(TOOL).1 "$(PREFIX)/share/man/man1/$(TOOL).1"
+	cp -f completions/$(TOOL).bash "$(PREFIX)/share/bash-completion/completions/$(TOOL)"
+	cp -f completions/_$(TOOL) "$(PREFIX)/share/zsh/site-functions/_$(TOOL)"
+	cp -f completions/$(TOOL).fish "$(PREFIX)/share/fish/vendor_completions.d/$(TOOL).fish"
+	printf '#!/bin/sh\nexec "%s/share/$(TOOL)/bin/$(TOOL)" "$$@"\n' "$(PREFIX)" >"$(PREFIX)/bin/$(TOOL)"
+	chmod 755 "$(PREFIX)/bin/$(TOOL)"
+
+
+clean:
+	rm -rf coverage coverage-macos.json coverage-linux.json coverage-linux-warnings.log

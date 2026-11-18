@@ -4,32 +4,117 @@
 
 <strong>Sensible tmux defaults, gated by tmux version and terminal, that leave the options you set alone.</strong>
 
-English | [日本語](README.ja.md) | [简体中文](README.zh-Hans.md) | [繁體中文（香港）](README.zh-HK.md)
+English &nbsp;|&nbsp; [日本語](README.ja.md) &nbsp;|&nbsp; [简体中文](README.zh-Hans.md) &nbsp;|&nbsp; [繁體中文（香港）](README.zh-HK.md)
 
-[![family](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/family.yml?branch=main&style=flat-square&label=family)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/family.yml)
-[![tests](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/tests.yml)
+[![ci](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-sensible-revamped/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/tmux-revamped/tmux-sensible-revamped/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=release)](https://github.com/tmux-revamped/tmux-sensible-revamped/releases/latest)
 [![openssf scorecard](https://img.shields.io/ossf-scorecard/github.com/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=openssf%20scorecard)](https://scorecard.dev/viewer/?uri=github.com/tmux-revamped/tmux-sensible-revamped)
 [![license](https://img.shields.io/github/license/tmux-revamped/tmux-sensible-revamped?style=flat-square&label=license)](LICENSE)
 
 <p align="center">
-  <a href="#what-it-does">What it does</a> |
-  <a href="#requirements">Requirements</a> |
-  <a href="#installation">Installation</a> |
-  <a href="#configuration">Configuration</a> |
-  <a href="#key-bindings">Key bindings</a> |
-  <a href="#how-it-works">How it works</a>
+  <a href="#quick-start"><strong>Quick start</strong></a> &nbsp;|&nbsp;
+  <a href="#usage">Usage</a> &nbsp;|&nbsp;
+  <a href="#what-it-sets">What it sets</a> &nbsp;|&nbsp;
+  <a href="#key-bindings">Key bindings</a> &nbsp;|&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;|&nbsp;
+  <a href="#screens">Screens</a>
 </p>
 
 </div>
 
-**22** tmux options set only while they still hold the tmux default. **11** terminal capability entries, each appended once. Every option gated to the tmux versions that have it, from **1.9** up.
+<p align="center">
+  <img src="screens/hero.gif" alt="sensible-revamped raising tmux's defaults in one command, then switching windows with prefix C-n and C-p" width="800">
+</p>
+
+```console
+$ tmux show-option -gv history-limit
+2000
+$ sensible-revamped apply
+$ tmux show-option -gv history-limit
+50000
+```
+
+The plugin sets the defaults most tmux users end up writing by hand: no ESC delay, a large scrollback, windows numbered from 1, truecolor, and copy to the system clipboard. Each setting is checked against the running tmux version and the outer terminal before it is applied. An option your tmux does not have is skipped.
 
 ---
 
-## What it does
+## Quick start
 
-The plugin sets the defaults most tmux users end up writing by hand: no ESC delay, a large scrollback, windows numbered from 1, truecolor, and copy to the system clipboard. Each setting is checked against the running tmux version and the outer terminal before it is applied. An option your tmux does not have is skipped.
+### Prerequisites
+
+| Tool | Version | Used for |
+|:-----|:--------|:---------|
+| tmux | 3.2 or later | the family floor; an option newer than the running tmux is skipped |
+| clipboard tool | optional | `wl-copy`, `termux-clipboard-set`, `pbcopy`, `xclip`, `xsel` or `clip.exe`; without one a copy goes through the terminal with OSC 52 |
+| `infocmp` | optional | picks `tmux-direct` or `tmux-256color` for `default-terminal`; without it the value is `screen-256color` |
+| gum | optional | the menu, tables and colours of `sensible-revamped`; without it every command prints plain text |
+
+### Install
+
+```tmux
+set -g @plugin 'tmux-revamped/tmux-sensible-revamped'
+```
+
+Then press `prefix + I`. Without TPM, clone the repository and run its entry point from `~/.tmux.conf`:
+
+```bash
+git clone https://github.com/tmux-revamped/tmux-sensible-revamped ~/.tmux/plugins/tmux-sensible-revamped
+```
+
+```tmux
+run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
+```
+
+`make install` in the clone also puts `sensible-revamped` in `~/.local/bin`, with its man page and completions under `~/.local/share`.
+
+### Verify
+
+```bash
+~/.tmux/plugins/tmux-sensible-revamped/bin/sensible-revamped doctor
+```
+
+## Usage
+
+Nothing to call. Reload tmux and check one of the values:
+
+```bash
+tmux show-option -gv history-limit
+```
+
+```text
+50000
+```
+
+To keep your own value for any option in the table, set it in `~/.tmux.conf`. The plugin compares each option with the tmux default before writing, and a value that differs is left alone. A value you set equal to the tmux default cannot be told apart from an unset one, so the plugin replaces it.
+
+| Command | What it does |
+|:--------|:-------------|
+| `sensible-revamped apply` | Sets the defaults and binds the keys now; the entry point runs it when tmux loads the plugin |
+| `sensible-revamped list` | Prints every tmux command `apply` would run and changes nothing; `--json` prints one object |
+| `sensible-revamped resize-sync` | Turns `aggressive-resize` off while a control-mode client is attached and puts it back afterwards; the client hooks run it |
+| `sensible-revamped doctor` | One row per dependency, the clipboard tool and any key left alone included |
+| `sensible-revamped version` | The version, then the tmux version |
+| `sensible-revamped help` | The help page; `man sensible-revamped` documents the same commands and settings |
+| `sensible-revamped` | On a terminal, a menu |
+
+| Option | Default | Meaning |
+|:-------|:--------|:--------|
+| `@sensible_revamped_keys` | `on` | `off` skips the reload, last-window, `C-p` and `C-n` bindings. The prefix wiring and the copy-mode bindings still apply |
+| `@sensible_revamped_reload_key` | empty | prefix key that re-sources the config. Unbound until set |
+| `@sensible_revamped_last_window_key` | empty | prefix key that switches to the last window. Unbound until set |
+
+```tmux
+set -g @sensible_revamped_reload_key 'R'
+set -g @sensible_revamped_last_window_key 'a'
+```
+
+The reload key sources the first config that exists among `$XDG_CONFIG_HOME/tmux/tmux.conf`, `~/.config/tmux/tmux.conf` and `~/.tmux.conf`, then shows `tmux-sensible-revamped: reloaded`.
+
+Every option is also a command option with dashes, such as `--reload-key R`, and an environment variable, such as `SENSIBLE_REVAMPED_RELOAD_KEY`; the command line wins over the environment, and the environment over the tmux option. An empty tmux option means its default. The plugin writes `@sensible_revamped_resize_saved` itself.
+
+<a id="what-it-sets"></a>
+
+## What it sets
 
 | Area | Settings | Minimum tmux |
 |:-----|:---------|:-------------|
@@ -47,72 +132,9 @@ The plugin sets the defaults most tmux users end up writing by hand: no ESC dela
 
 The CSI u terminal list is xterm, kitty, foot, Alacritty, Contour, Rio, st, Konsole, iTerm2, WezTerm, Ghostty and mintty, matched on `TERM` and `TERM_PROGRAM`.
 
-## Requirements
+The terminal is the one the tmux server started in: tmux gives a plugin its own `TERM` and `TERM_PROGRAM`, so the plugin reads both from tmux's global environment.
 
-| Tool | Version | Notes |
-|:-----|:--------|:------|
-| tmux | 1.9 or later | Options newer than the running tmux are skipped |
-| bash | 3.2 or later | macOS `/bin/bash` works |
-| A clipboard tool | optional | `wl-copy`, `termux-clipboard-set`, `pbcopy`, `xclip`, `xsel` or `clip.exe`. Without one, copy goes through OSC 52 |
-
-CI runs the test suite on Ubuntu LTS for x86_64 and arm64 with GNU and uutils coreutils, and on macOS for Apple Silicon and Intel with the system tools, GNU tools and uutils.
-
-## Installation
-
-With [TPM](https://github.com/tmux-plugins/tpm), add this line to `~/.tmux.conf` and press `prefix + I`:
-
-```tmux
-set -g @plugin 'tmux-revamped/tmux-sensible-revamped'
-```
-
-TPM loads plugins after the rest of your config, so the position of the line does not matter.
-
-Without TPM, clone the repository and run the entry point from your config:
-
-```bash
-git clone https://github.com/tmux-revamped/tmux-sensible-revamped ~/.tmux/plugins/tmux-sensible-revamped
-```
-
-```tmux
-run-shell ~/.tmux/plugins/tmux-sensible-revamped/sensible-revamped.tmux
-```
-
-## Usage
-
-Nothing to call. Reload tmux and check one of the values:
-
-```bash
-tmux show-option -gv history-limit
-```
-
-```text
-50000
-```
-
-To keep your own value for any option in the table, set it in `~/.tmux.conf`. The plugin compares each option with the tmux default before writing, and a value that differs is left alone. A value you set equal to the tmux default cannot be told apart from an unset one, so the plugin replaces it.
-
-## Configuration
-
-| Option | Default | Meaning |
-|:-------|:--------|:--------|
-| `@sensible_revamped_keys` | `on` | `off` skips the reload, last-window, `C-p` and `C-n` bindings. The prefix wiring and the copy-mode bindings still apply |
-| `@sensible_revamped_reload_key` | empty | prefix key that re-sources the config. Unbound until set |
-| `@sensible_revamped_last_window_key` | empty | prefix key that switches to the last window. Unbound until set |
-
-```tmux
-set -g @sensible_revamped_reload_key 'R'
-set -g @sensible_revamped_last_window_key 'a'
-```
-
-The reload key sources the first config that exists among `$XDG_CONFIG_HOME/tmux/tmux.conf`, `~/.config/tmux/tmux.conf` and `~/.tmux.conf`, then shows `tmux-sensible-revamped: reloaded`.
-
-### Internal state
-
-The plugin manages this option itself. Do not set it.
-
-| Option | Holds |
-|:-------|:------|
-| `@sensible_revamped_resize_saved` | the global `aggressive-resize` value saved while a control-mode client is attached. It is restored and unset when the last control-mode client leaves |
+<a id="key-bindings"></a>
 
 ## Key bindings
 
@@ -133,9 +155,11 @@ The copy-mode bindings replace any binding you made for those keys. To keep your
 
 The clipboard tool is chosen in this order: `wl-copy` under Wayland, `termux-clipboard-set`, `pbcopy` on macOS, `xclip` then `xsel` under X11, and `clip.exe` on WSL. `clip.exe` comes after the X11 tools so a WSLg session keeps the UTF-8 path. On macOS, `default-command` runs your shell through `reattach-to-user-namespace` when that helper is installed.
 
+<a id="how-it-works"></a>
+
 ## How it works
 
-[`sensible-revamped.tmux`](sensible-revamped.tmux) runs [`src/sensible.sh`](src/sensible.sh) once at load. That script reads the tmux version, the operating system, `TERM`, `TERM_PROGRAM` and `COLORTERM`, then writes each setting through one of three guards:
+[`sensible-revamped.tmux`](sensible-revamped.tmux) runs `bin/sensible-revamped apply` once at load. It reads the tmux version, every option it may change, the key table and the terminal in three tmux calls, then sends every command in a fourth, each through one of three guards:
 
 | Guard | Rule |
 |:------|:-----|
@@ -143,17 +167,85 @@ The clipboard tool is chosen in this order: `wl-copy` under Wayland, `termux-cli
 | append-once | adds a `terminal-overrides` or `terminal-features` entry only when the entry is absent, so a reload does not grow the list |
 | free-key check | binds a convenience key only when `tmux list-keys` shows no binding for it |
 
-On tmux 3.0 and later, `client-attached` and `client-detached` hooks call the script with `--resize-sync`. While any iTerm2 control-mode client is attached, the hook saves the global `aggressive-resize` value and turns it off, because control mode breaks with it on. When the last control-mode client leaves, the saved value comes back. A normal client attaching changes nothing.
+On tmux 3.0 and later, `client-attached` and `client-detached` hooks run `sensible-revamped resize-sync`. While any iTerm2 control-mode client is attached, the hook saves the global `aggressive-resize` value and turns it off, because control mode breaks with it on. When the last control-mode client leaves, the saved value comes back. A normal client attaching changes nothing.
 
-The decisions live as pure functions in [`src/lib/sensible/sensible.sh`](src/lib/sensible/sensible.sh). Setting `SENSIBLE_DRY_RUN` makes the applier print each tmux command instead of running it, which is how the tests cover the version matrix.
+`sensible-revamped list` prints every command `apply` would run and changes nothing, which is how to see what the plugin would do on your server.
+
+<a id="screens"></a>
+
+## Screens
+
+<details>
+<summary>Every screen, recorded inside a real tmux with <code>make screens</code>, with each key on the status line</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="screens/defaults.png" alt="sensible-revamped: apply raises tmux's own defaults"><br><sub><code>apply</code> raises tmux's own defaults, from <code>hero.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/next-window.png" alt="sensible-revamped: prefix C-n goes to the next window"><br><sub><code>prefix C-n</code> goes to the next window, from <code>hero.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu.png" alt="sensible-revamped: The menu"><br><sub>The menu, from <code>hero.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/doctor.png" alt="sensible-revamped: doctor"><br><sub><code>doctor</code>, from <code>hero.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/reload.png" alt="sensible-revamped: The reload key sources the config again"><br><sub>The reload key sources the config again, from <code>keys.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/last-window.png" alt="sensible-revamped: The last-window key goes back"><br><sub>The last-window key goes back, from <code>keys.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy.png" alt="sensible-revamped: v selects in vi copy-mode"><br><sub><code>v</code> selects in vi copy-mode, from <code>keys.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/copied.png" alt="sensible-revamped: y copies to the clipboard tool"><br><sub><code>y</code> copies to the clipboard tool, from <code>keys.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/list.png" alt="sensible-revamped: list prints every command"><br><sub><code>list</code> prints every command, from <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/plain-menu.png" alt="sensible-revamped: The menu without gum"><br><sub>The menu without gum, from <code>stills.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-doctor.png" alt="sensible-revamped: doctor from the menu"><br><sub><code>doctor</code> from the menu, from <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/version.png" alt="sensible-revamped: The version"><br><sub>The version, from <code>stills.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/error.png" alt="sensible-revamped: An unknown command"><br><sub>An unknown command, from <code>stills.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/themes.png" alt="sensible-revamped: The header in six themes"><br><sub>The header in six themes, from <code>themes.tape</code></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/help.png" alt="sensible-revamped: The help page"><br><sub>The help page, from <code>help.tape</code></sub></td>
+<td width="50%" valign="top"><img src="screens/accent.png" alt="sensible-revamped: An accent from SENSIBLE_REVAMPED_ACCENT"><br><sub>An accent from <code>SENSIBLE_REVAMPED_ACCENT</code>, from <code>stills.tape</code></sub></td>
+</tr>
+</table>
+
+</details>
+
+## Portability
+
+The plugin is POSIX `sh`. CI runs every suite on each row below.
+
+| Shell | Status |
+|:------|:-------|
+| `dash`, `/bin/sh` on macOS | Supported |
+| `bash` 3.2 and 5.x, the system's `zsh` and Homebrew's | Supported |
+
+| System | Status |
+|:-------|:-------|
+| macOS | Tahoe on Apple Silicon and Intel, with the tools it ships, Homebrew's GNU tools and Homebrew's uutils |
+| Linux | Ubuntu 26.04 on x86_64 and arm64, with GNU coreutils, uutils and BusyBox |
 
 ## Development
 
 | Command | What it runs |
 |:--------|:-------------|
-| `make test` | the bats suite |
-| `make lint` | shellcheck at warning level on every shell file |
-| `make coverage` | kcov line coverage with a 95 percent floor, Linux only |
+| `make fmt` | shfmt `-i 2` on every script |
+| `make lint` | shfmt, ShellCheck, mandoc, yamllint and actionlint, at zero findings |
+| `make test` | The bats suites under the system `sh` |
+| `make test-all` | The suites under every installed shell, both builds of bash and zsh on macOS |
+| `make test-linux` | The suites in an Ubuntu container |
+| `make coverage` | bashcov on this Mac and in the Ubuntu container, merged and gated at 100 percent |
+| `make screens` | The screens above, recorded from the real plugin inside tmux with VHS, on macOS |
+| `make install` | The command, its man page and completions under `PREFIX` |
+
+On macOS, `brew bundle` installs every tool these targets call, from the [`Brewfile`](Brewfile).
+
+Commits follow the conventional commit format and go straight to `main`. After a green `ci` run on `main`, `release.yml` runs semantic-release: every `feat` or `fix` since the last tag publishes a release, stamps the version constant and adds the notes to [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 

@@ -1,0 +1,3 @@
+$ sensible-revamped
+sensible-revamped: no command given. run 'sensible-revamped help' for usage.
+exit 1

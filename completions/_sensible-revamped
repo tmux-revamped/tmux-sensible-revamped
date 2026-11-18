@@ -1,0 +1,27 @@
+#compdef sensible-revamped
+
+_sensible_revamped() {
+  local -a commands
+  commands=(
+    'apply:set the defaults and bind the keys now'
+    'list:print every tmux command apply would run'
+    'resize-sync:follow control-mode clients with aggressive-resize'
+    'doctor:check this machine'
+    'version:print the version'
+    'help:print the help page'
+  )
+
+  _arguments \
+    '--json[list prints one JSON object]' \
+    '--theme[colours of the terminal interface]:theme:(kodougu catppuccin-mocha catppuccin-latte dracula nord gruvbox tokyo-night mono)' \
+    '--keys[bind the window keys]:value:(on off)' \
+    '--last-window-key[a key for the last window]:value:' \
+    '--reload-key[a key that sources the config again]:value:' \
+    '1:command:->command'
+
+  if [[ "${state}" == command ]]; then
+    _describe 'command' commands
+  fi
+}
+
+_sensible_revamped "$@"

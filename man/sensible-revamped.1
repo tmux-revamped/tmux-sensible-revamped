@@ -1,0 +1,157 @@
+.TH SENSIBLE-REVAMPED 1 "2026-11-17" "sensible-revamped" "User Commands"
+.SH NAME
+sensible-revamped \- tmux defaults that leave the options you set alone
+.SH SYNOPSIS
+.B sensible-revamped
+.RI [ options ]
+.B apply
+.br
+.B sensible-revamped
+.RB [ \-\-json ]
+.RI [ options ]
+.B list
+.br
+.B sensible-revamped resize-sync
+.br
+.B sensible-revamped doctor
+.br
+.B sensible-revamped version
+.br
+.B sensible-revamped help
+.SH DESCRIPTION
+.B sensible-revamped
+sets the defaults most tmux users end up writing by hand: no escape delay, a
+large scrollback, windows numbered from 1, truecolor, extended keys and copy
+to the system clipboard. Each setting is checked against the running tmux
+version and the terminal before it is applied, and an option the person set
+is left alone. The entry point
+.B sensible-revamped.tmux
+runs
+.B apply
+once when tmux loads the plugin, and every command goes to tmux in one call.
+.PP
+The terminal is the one the tmux server started in. tmux gives a plugin its
+own TERM and TERM_PROGRAM, so both are read from tmux's global environment.
+.PP
+Run with no command on a terminal, it offers a menu.
+.SH COMMANDS
+.TP
+.B apply
+Set the defaults and bind the keys now. An option is written only while it is
+empty or at tmux's own default, a terminal feature or override only when it is
+absent, and a key only when it is free.
+.TP
+.B list
+Print every tmux command apply would run, one per line, and change nothing.
+.TP
+.B resize\-sync
+Turn aggressive-resize off while a control-mode client is attached, keeping
+the earlier value in
+.BR @sensible_revamped_resize_saved ,
+and put it back when the last one leaves. The client hooks run it.
+.TP
+.B doctor
+Print one row per dependency: tmux, the clipboard tool, infocmp, the keys it
+found bound, gum and the core tools. Exits 1 only when a required tool is
+missing.
+.TP
+.B version
+Print the version, then the tmux version.
+.TP
+.B help
+Print the help page.
+.SH OPTIONS
+.TP
+.B \-\-json
+.B list
+prints one JSON object.
+.TP
+.BI \-\-theme " name"
+Colours of the terminal interface:
+.BR kodougu ,
+.BR catppuccin\-mocha ,
+.BR catppuccin\-latte ,
+.BR dracula ,
+.BR nord ,
+.BR gruvbox ,
+.B tokyo\-night
+or
+.BR mono .
+The default is
+.BR kodougu .
+.TP
+.BI \-\- setting " value"
+Any tmux option below, named with dashes, such as
+.B \-\-keys
+or
+.BR \-\-reload\-key .
+It also takes the form
+.IR \-\-setting = value ,
+and outranks the environment and the tmux option.
+.SH ENVIRONMENT
+.TP
+.BI SENSIBLE_REVAMPED_ SETTING
+Any tmux option below in capitals, such as
+.BR SENSIBLE_REVAMPED_KEYS .
+It outranks the tmux option.
+.TP
+.B SENSIBLE_REVAMPED_THEME
+The theme when
+.B \-\-theme
+is not given.
+.TP
+.B SENSIBLE_REVAMPED_ACCENT
+A colour such as #CBA6F7 that replaces the accent of the theme.
+.TP
+.B KODOUGU_THEME
+The theme of every kodougu and tmux-revamped tool, when neither
+.B \-\-theme
+nor
+.B SENSIBLE_REVAMPED_THEME
+is set.
+.TP
+.B KODOUGU_ACCENT
+The accent of every kodougu and tmux-revamped tool, when
+.B SENSIBLE_REVAMPED_ACCENT
+is not set.
+.TP
+.B NO_COLOR
+Turns colour off in every theme.
+.TP
+.BR TERM ,\  TERM_PROGRAM ,\  COLORTERM ,\  LC_TERMINAL
+The terminal, which decides truecolor, extended keys, sixel and hyperlinks.
+TERM and TERM_PROGRAM come from the environment the tmux server started in.
+.TP
+.BR EDITOR ,\  VISUAL
+vi in either one turns the copy-mode keys to vi.
+.TP
+.BR WAYLAND_DISPLAY ,\  DISPLAY
+Decide between wl-copy and the X11 clipboard tools.
+.SH TMUX OPTIONS
+An empty tmux option means its default.
+.TP
+.B @sensible_revamped_keys
+off skips C\-p, C\-n, the last\-window key and the reload key. The custom
+prefix and the copy\-mode keys still apply. The default is on.
+.TP
+.B @sensible_revamped_last_window_key
+A prefix key that switches to the last window. The default is none.
+.TP
+.B @sensible_revamped_reload_key
+A prefix key that sources the config file again and says so. The default is
+none.
+.TP
+.B @revamped_theme
+The theme of every tmux-revamped tool, when nothing else sets one. The default
+is
+.BR kodougu .
+.PP
+The plugin writes one option itself:
+.B @sensible_revamped_resize_saved
+holds the aggressive-resize value while a control-mode client is attached.
+.SH EXIT STATUS
+0 on success, 1 on any failure.
+.SH SEE ALSO
+.BR tmux (1),
+.BR infocmp (1),
+.BR gum (1)

@@ -3,5 +3,5 @@
 
 # Critical paths require explicit review
 *.tmux @gufranco
-src/ @gufranco
+lib/ @gufranco
 .github/workflows/ @gufranco

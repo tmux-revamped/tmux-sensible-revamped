@@ -1,0 +1,25 @@
+#!/bin/sh
+set -u
+
+case "${1:-}" in
++%S)
+  if [ -n "${REVAMPED_TEST_SECOND:-}" ]; then
+    printf '%s\n' "${REVAMPED_TEST_SECOND}"
+    exit 0
+  fi
+  ;;
++%s)
+  if [ -n "${REVAMPED_TEST_NOW:-}" ]; then
+    printf '%s\n' "${REVAMPED_TEST_NOW}"
+    exit 0
+  fi
+  ;;
+'+%Y-%m-%d %H:%M:%S')
+  if [ -n "${REVAMPED_TEST_TIMESTAMP:-}" ]; then
+    printf '%s\n' "${REVAMPED_TEST_TIMESTAMP}"
+    exit 0
+  fi
+  ;;
+*) ;;
+esac
+exec /bin/date "$@"

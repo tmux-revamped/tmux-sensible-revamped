@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-PLUGIN_DIR="${BATS_TEST_DIRNAME}"
-while [[ "${PLUGIN_DIR}" != "/" ]] && [[ ! -d "${PLUGIN_DIR}/src" ]]; do
+PLUGIN_DIR="${BATS_TEST_DIRNAME:-.}"
+while [[ "${PLUGIN_DIR}" != "/" ]] && [[ ! -d "${PLUGIN_DIR}/lib" ]]; do
   PLUGIN_DIR="$(dirname "${PLUGIN_DIR}")"
 done
 
+unset TMUX TMUX_PANE
 TMUX_SOCKET="/tmp/tmux-plugin-test-${BASHPID}-${RANDOM}"
 
 setup_tmux_server() {
@@ -34,7 +35,7 @@ export TMUX_SOCKET
 export PLUGIN_DIR
 
 _TMUX_HELPERS_LOCAL="$(dirname "${BASH_SOURCE[0]}")/tmux_helpers_local.bash"
-if [ -f "${_TMUX_HELPERS_LOCAL}" ]; then
+if [[ -f "${_TMUX_HELPERS_LOCAL}" ]]; then
   # shellcheck source=/dev/null
   source "${_TMUX_HELPERS_LOCAL}"
 fi

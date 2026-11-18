@@ -1,0 +1,7 @@
+#!/bin/sh
+# shellcheck disable=SC2034
+
+[ -n "${SENSIBLE_REVAMPED_CORE_LOADED:-}" ] && return 0
+SENSIBLE_REVAMPED_CORE_LOADED=1
+
+readonly SENSIBLE_REVAMPED_VERSION="2.0.1"

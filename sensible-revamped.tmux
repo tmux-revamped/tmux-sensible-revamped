@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-bash "${CURRENT_DIR}/src/sensible.sh"
+sensible_revamped_dir=$(cd "$(dirname "$0")" && pwd)
+"${sensible_revamped_dir}/bin/sensible-revamped" apply

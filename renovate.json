@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": ["github-actions", "bundler", "ruby-version"],
+  "dependencyDashboard": false,
+  "schedule": ["* 5,13,21 * * *"],
+  "timezone": "Etc/UTC",
+  "labels": ["dependencies"],
+  "automerge": true,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": false,
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["github-runner"],
+      "enabled": true,
+      "semanticCommitType": "ci"
+    }
+  ]
+}
