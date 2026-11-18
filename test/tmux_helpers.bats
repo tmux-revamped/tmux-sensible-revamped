@@ -6,7 +6,7 @@ load "${BATS_TEST_DIRNAME:-.}/tmux_helpers.bash"
 @test "tmux_helpers - the test server starts without the user's tmux.conf" {
   # Arrange
   local log="${BATS_TEST_TMPDIR:?}/tmux-args"
-  command() { printf '%s\n' "$*" >"${log}"; }
+  command() { printf '%s\n' "$*" >>"${log}"; }
 
   # Act
   setup_tmux_server
@@ -14,6 +14,18 @@ load "${BATS_TEST_DIRNAME:-.}/tmux_helpers.bash"
   # Assert
   actual="$(cat "${log}")"
   [[ "${actual}" == *"-f /dev/null new-session"* ]]
+}
+
+@test "tmux_helpers - the test server never takes fast keys for pasted text" {
+  # Arrange
+  setup_tmux_server
+
+  # Act
+  run tmux show-option -gv assume-paste-time
+
+  # Assert
+  teardown_tmux_server
+  [[ "${output}" == "0" ]]
 }
 
 @test "tmux_helpers - a test never sees the tmux it was started from" {
