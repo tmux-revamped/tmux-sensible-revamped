@@ -1,5 +1,20 @@
 # Changelog
 
+# [3.0.0](https://github.com/tmux-revamped/tmux-sensible-revamped/compare/v2.0.1...v3.0.0) (2026-11-18)
+
+
+* feat!: rewrite the plugin in POSIX sh ([d295755](https://github.com/tmux-revamped/tmux-sensible-revamped/commit/d2957559423c27bf60ce92163c4641a3e4c19290))
+
+
+### BREAKING CHANGES
+
+* the script moved from src/sensible.sh to
+bin/sensible-revamped. The SENSIBLE_DRY_RUN variable is replaced by the
+command sensible-revamped list, and the --resize-sync option by the
+command resize-sync. The terminal is read from the environment the tmux
+server started in. bash is no longer required. A tmux option set to
+nothing now means its default, where it used to stay empty.
+
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
