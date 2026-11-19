@@ -20,6 +20,7 @@ Every member holds these without exception. This file is what enforces them: a r
 - **Lean.** A file, a section or a step stays only while something needs it. Nothing restates this file, and nothing exists only to police it.
 - **No aliases.** A renamed option, command, key or file keeps no alias, and no compatibility shim exists: the old name stops working in the release that renames it.
 - **Nothing beyond the plugin.** A repository holds the plugin, its tests, CI, its docs, [`AGENTS.md`](AGENTS.md), this file, and the coding agent's instruction file, which only imports those two. No family folder, no family tooling, no AI tooling such as agent definitions, prompts or editor assistant settings.
+- **A rewrite keeps every value.** A rewrite or a rename keeps every value the old version read for a setting, with its unit: each spelling of on and off, each word such as `off` or `none`, a number in the unit it had. Dropping a value or changing a unit is a breaking change the owner decides; it never follows from the alias rule, which is about names.
 - **Both platforms.** Every feature works in full on Linux and on macOS, as Platforms describes.
 - **doctor in every member.** Every member has `bin/<tool>`, which answers `help`, `version` and `doctor` as Commands describes, and `doctor` names every dependency with its path and version.
 - **gum interface.** Every member draws its terminal interface with gum, and where gum cannot draw it falls back byte for byte to the plain interface, as Terminal interface describes.
@@ -130,6 +131,7 @@ The plain page has no colour, no emoji and no bracketed level tags. On a termina
 - Results and progress lines go to stdout. Prompts, diagnostics, and a progress line redrawn in place on a terminal go to stderr.
 - A status placeholder, `#{<prefix>_<name>}`, prints its value and nothing else. A value the host has no source for renders empty, and `doctor` says which source is missing.
 - Text that comes from outside the plugin, such as a process, window or song name, has every `#` doubled before tmux reads it as a format.
+- Whatever a member places in a status line's `#()` job, such as its own path or a setting's value, has every `%` doubled as well as every `#`: tmux runs the status line through strftime before it starts the job, so a `%s` in a format given to `apply` reached the job as the seconds since 1970.
 - A folder handed to tmux as a start directory, the `-c` of `new-window`, `split-window` and `new-session` and the `-d` of `display-popup`, has every `#` doubled first: tmux expands formats there, so a folder whose path holds `#S` would open somewhere else.
 - A format inside a command that tmux parses when a key runs, such as a branch of `if-shell`, is written in double quotes: tmux reads an unquoted `#{` at the start of a word there as a comment and drops the rest of the command.
 - Numbers are computed and printed under the C locale, so a locale with a decimal comma still prints `1.5G`.
@@ -204,6 +206,8 @@ sed                ok       /opt/homebrew/opt/gnu-sed/libexec/gnubin/sed, gnu 4.
 The flavor is `gnu`, `uutils`, `bsd`, `mawk`, `busybox` or `unknown`. It comes from the tool's own `--version` answer, then from where it is installed, then from the system it runs on. BusyBox is read from the first line that names it or says it is not GNU.
 
 `doctor` also reports the tmux version, every source a placeholder reads and whether the host has it, the notifier under Notifications, and every default key the plugin skipped because the person had already bound it. A new dependency gets its `doctor` row, with its flavor when it is a core tool, in the same change.
+
+`doctor` prints a `settings` row. Each member lists in `<PREFIX>_KINDS`, in `lib/state.sh`, what every switch, number and choice among its settings accepts, read from how the member compares that setting, and `revamped_doctor_settings` checks the value in force, whether a tmux option, the environment or the command line gave it. A value outside the list is named as `name=value` with the state `warn`, because a status line cannot say that an option was ignored. A setting that takes free text, a key or a colour has no kind, and an empty value means the default and is never named. A setting that is added or changed gets its kind in the same change.
 
 ## Toolsets
 
