@@ -52,7 +52,9 @@ and put it back when the last one leaves. The client hooks run it.
 .TP
 .B doctor
 Print one row per dependency: tmux, the clipboard tool, infocmp, the keys it
-found bound, gum and the core tools. Exits 1 only when a required tool is
+found bound, gum and the core tools.
+A settings row names any setting whose value it does not know.
+Exits 1 only when a required tool is
 missing.
 .TP
 .B version

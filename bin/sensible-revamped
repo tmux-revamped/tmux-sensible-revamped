@@ -131,11 +131,17 @@ sensible_revamped_doctor_keys() {
   revamped_doctor_line keys ok "every key it binds is free or its own"
 }
 
+sensible_revamped_doctor_settings() {
+  # shellcheck disable=SC2154
+  revamped_doctor_settings "${SENSIBLE_REVAMPED_KINDS}" "keys	${SENSIBLE_REVAMPED_S_keys}"
+}
+
 sensible_revamped_doctor() {
   revamped_doctor_tmux
   sensible_revamped_doctor_clipboard
   sensible_revamped_doctor_terminfo
   sensible_revamped_doctor_keys
+  sensible_revamped_doctor_settings
   revamped_doctor_gum
   revamped_doctor_core_tools awk sed grep tr
   revamped_doctor_finish

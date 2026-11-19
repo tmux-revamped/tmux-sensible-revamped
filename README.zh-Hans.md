@@ -110,7 +110,7 @@ set -g @sensible_revamped_last_window_key 'a'
 
 重新加载键会加载 `$XDG_CONFIG_HOME/tmux/tmux.conf`、`~/.config/tmux/tmux.conf` 和 `~/.tmux.conf` 中第一个存在的文件，然后显示 `tmux-sensible-revamped: reloaded`。
 
-每个选项也可以用带连字符的命令选项（例如 `--reload-key R`）和环境变量（例如 `SENSIBLE_REVAMPED_RELOAD_KEY`）设置；命令行优先于环境变量，环境变量优先于 tmux 选项。空的 tmux 选项表示使用默认值。`@sensible_revamped_resize_saved` 由插件自己写入。
+每个选项也可以用带连字符的命令选项（例如 `--reload-key R`）和环境变量（例如 `SENSIBLE_REVAMPED_RELOAD_KEY`）设置；命令行优先于环境变量，环境变量优先于 tmux 选项。空的 tmux 选项表示使用默认值。`doctor` 会指出值无法识别的设置。`@sensible_revamped_resize_saved` 由插件自己写入。
 
 <a id="设置的内容"></a>
 

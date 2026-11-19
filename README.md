@@ -110,7 +110,7 @@ set -g @sensible_revamped_last_window_key 'a'
 
 The reload key sources the first config that exists among `$XDG_CONFIG_HOME/tmux/tmux.conf`, `~/.config/tmux/tmux.conf` and `~/.tmux.conf`, then shows `tmux-sensible-revamped: reloaded`.
 
-Every option is also a command option with dashes, such as `--reload-key R`, and an environment variable, such as `SENSIBLE_REVAMPED_RELOAD_KEY`; the command line wins over the environment, and the environment over the tmux option. An empty tmux option means its default. The plugin writes `@sensible_revamped_resize_saved` itself.
+Every option is also a command option with dashes, such as `--reload-key R`, and an environment variable, such as `SENSIBLE_REVAMPED_RELOAD_KEY`; the command line wins over the environment, and the environment over the tmux option. An empty tmux option means its default. `doctor` names any setting that holds a value the plugin does not know. The plugin writes `@sensible_revamped_resize_saved` itself.
 
 <a id="what-it-sets"></a>
 

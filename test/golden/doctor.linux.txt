@@ -3,6 +3,7 @@ tmux               ok       <path>, 3.8
 clipboard          warn     no clipboard tool, so a copy goes through the terminal with OSC 52
 infocmp            ok       <path>
 keys               ok       every key it binds is free or its own
+settings           ok       every option holds a value it knows
 gum                ok       <path>
 awk                ok       <path>, <flavor>
 sed                ok       <path>, <flavor>

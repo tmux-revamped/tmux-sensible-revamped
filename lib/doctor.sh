@@ -115,6 +115,46 @@ revamped_doctor_notifier() {
   revamped_doctor_line notifier ok "${revamped_doctor_notifier_backend}"
 }
 
+revamped_doctor_settings_odd() {
+  REVAMPED_DOCTOR_KINDS="$1" REVAMPED_DOCTOR_VALUES="$2" awk '
+    function known(kind, value,    words, count, i) {
+      count = split(kind, words, " ")
+      if (words[1] == "number") {
+        if (value !~ /^[0-9]+$/) { return 0 }
+        if (count >= 2 && value + 0 < words[2] + 0) { return 0 }
+        return count < 3 || value + 0 <= words[3] + 0
+      }
+      for (i = 1; i <= count; i++) { if (value == words[i]) { return 1 } }
+      return 0
+    }
+    BEGIN {
+      count = split(ENVIRON["REVAMPED_DOCTOR_KINDS"], rows, "\n")
+      for (i = 1; i <= count; i++) {
+        at = index(rows[i], "\t")
+        if (at > 0) { kinds[substr(rows[i], 1, at - 1)] = substr(rows[i], at + 1) }
+      }
+      count = split(ENVIRON["REVAMPED_DOCTOR_VALUES"], rows, "\n")
+      for (i = 1; i <= count; i++) {
+        at = index(rows[i], "\t")
+        name = substr(rows[i], 1, at - 1)
+        value = substr(rows[i], at + 1)
+        if (at == 0 || value == "" || !(name in kinds) || known(kinds[name], value)) { continue }
+        odd = odd (odd == "" ? "" : " ") name "=" value
+      }
+      print odd
+    }
+  '
+}
+
+revamped_doctor_settings() {
+  revamped_doctor_settings_found=$(revamped_doctor_settings_odd "$1" "$2")
+  if [ -n "${revamped_doctor_settings_found}" ]; then
+    revamped_doctor_line settings warn "unknown values: ${revamped_doctor_settings_found}"
+    return 0
+  fi
+  revamped_doctor_line settings ok "every option holds a value it knows"
+}
+
 revamped_doctor_finish() {
   if revamped_ui_out; then
     printf 'Tool\tState\tDetail\n%s' "${REVAMPED_DOCTOR_ROWS}" | revamped_ui_table

@@ -110,7 +110,7 @@ set -g @sensible_revamped_last_window_key 'a'
 
 再読み込みのキーは、`$XDG_CONFIG_HOME/tmux/tmux.conf`、`~/.config/tmux/tmux.conf`、`~/.tmux.conf`のうち最初に存在するものを読み込み、`tmux-sensible-revamped: reloaded`と表示します。
 
-どのオプションも、ダッシュ区切りのコマンドオプション（例 `--reload-key R`）と環境変数（例 `SENSIBLE_REVAMPED_RELOAD_KEY`）で指定できます。優先順位はコマンドライン、環境変数、tmux オプションの順です。空の tmux オプションは既定値を意味します。`@sensible_revamped_resize_saved` はプラグイン自身が書き込みます。
+どのオプションも、ダッシュ区切りのコマンドオプション（例 `--reload-key R`）と環境変数（例 `SENSIBLE_REVAMPED_RELOAD_KEY`）で指定できます。優先順位はコマンドライン、環境変数、tmux オプションの順です。空の tmux オプションは既定値を意味します。`doctor` は、プラグインが認識できない値を持つ設定の名前を表示します。`@sensible_revamped_resize_saved` はプラグイン自身が書き込みます。
 
 <a id="設定される内容"></a>
 

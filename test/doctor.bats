@@ -160,3 +160,38 @@ flavor() {
   [[ "${status}" -eq 0 ]]
   [[ "${output}" == "notifier           ok       notify-send" ]]
 }
+
+@test "doctor - the settings row names each value outside what its kind lists" {
+  # Arrange
+  local script='kinds=$(printf "edges\ton off\nmode\tswap insert\ntimeout\tnumber\nwidth\tnumber 1 200"); values=$(printf "edges\tyes\nmode\tswap\ntimeout\t10s\nwidth\t0\nmenu_key\tM-x\nlive\t"); revamped_doctor_settings "${kinds}" "${values}"'
+
+  # Act
+  lib_run doctor "${script}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == "settings           warn     unknown values: edges=yes timeout=10s width=0" ]]
+}
+
+@test "doctor - the settings row is ok for known words, numbers in range with leading zeros, empty values and settings of no kind" {
+  # Arrange
+  local script='kinds=$(printf "edges\ton off\nmode\tswap insert\ntimeout\tnumber\nwidth\tnumber 1 200"); values=$(printf "edges\toff\nmode\tinsert\ntimeout\t007\nwidth\t0200\nmenu_key\tanything at all\nlive\t\nno-separator"); revamped_doctor_settings "${kinds}" "${values}"'
+
+  # Act
+  lib_run doctor "${script}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == "settings           ok       every option holds a value it knows" ]]
+}
+
+@test "doctor - a number above its range, or under a lower bound given alone, is named" {
+  # Arrange
+  local script='revamped_doctor_settings "$(printf "width\tnumber 1 200\nspeed\tnumber 1\nlines\tnumber 1")" "$(printf "width\t201\nspeed\t0\nlines\t90000")"'
+
+  # Act
+  lib_run doctor "${script}"
+
+  # Assert
+  [[ "${output}" == "settings           warn     unknown values: width=201 speed=0" ]]
+}
