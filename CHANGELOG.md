@@ -1,5 +1,19 @@
 # Changelog
 
+# [3.1.0](https://github.com/tmux-revamped/tmux-sensible-revamped/compare/v3.0.0...v3.1.0) (2026-11-19)
+
+
+### Bug Fixes
+
+* fold a table wider than the terminal ([77e30b0](https://github.com/tmux-revamped/tmux-sensible-revamped/commit/77e30b070aa3c06866f98129b795a3e6c5bb1041))
+* read the grep of macOS as bsd in doctor ([d84d656](https://github.com/tmux-revamped/tmux-sensible-revamped/commit/d84d65687898d8da9ca6732bb6302a4d42a5bf7c))
+* stop a recording that hangs ([e5e8238](https://github.com/tmux-revamped/tmux-sensible-revamped/commit/e5e8238e91ed9c198bb58da20667fffadec018ac))
+
+
+### Features
+
+* name unknown setting values in doctor ([d0c5659](https://github.com/tmux-revamped/tmux-sensible-revamped/commit/d0c56596ba672161db01d34f69c79541c57285cc))
+
 # [3.0.0](https://github.com/tmux-revamped/tmux-sensible-revamped/compare/v2.0.1...v3.0.0) (2026-11-18)
 
 
