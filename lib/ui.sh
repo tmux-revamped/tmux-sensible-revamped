@@ -20,6 +20,8 @@ REVAMPED_UI_SURFACE=""
 REVAMPED_UI_HELP="ascii"
 REVAMPED_UI_PROBLEM=""
 REVAMPED_UI_STEP=""
+REVAMPED_UI_COLS=0
+REVAMPED_UI_BOX=4
 REVAMPED_UI_THEMES="kodougu, catppuccin-mocha, catppuccin-latte, dracula, nord, gruvbox, tokyo-night, mono"
 
 # shellcheck disable=SC2034
@@ -235,9 +237,26 @@ revamped_ui_table() {
 }
 
 revamped_ui_table_body() {
+  revamped_ui_cols
   LC_ALL=C awk -F '\t' -v acc="${REVAMPED_UI_ACCENT}" -v ok="${REVAMPED_UI_OK}" -v warn="${REVAMPED_UI_WARN}" \
     -v bad="${REVAMPED_UI_ERR}" -v txt="${REVAMPED_UI_TEXT}" -v mut="${REVAMPED_UI_MUTED}" -v dash="$1" \
-    -f "${REVAMPED_LIB:?}/table.awk"
+    -v limit="$((REVAMPED_UI_COLS - REVAMPED_UI_BOX))" -f "${REVAMPED_LIB:?}/table.awk"
+}
+
+revamped_ui_size() {
+  stty size </dev/tty
+}
+
+revamped_ui_cols() {
+  REVAMPED_UI_COLS="${REVAMPED_TEST_COLS:-}"
+  if [ -z "${REVAMPED_UI_COLS}" ]; then
+    revamped_uc_size=$(revamped_ui_size 2>/dev/null) || revamped_uc_size=""
+    REVAMPED_UI_COLS="${revamped_uc_size##* }"
+  fi
+  case "${REVAMPED_UI_COLS}" in
+  '' | *[!0-9]*) REVAMPED_UI_COLS=0 ;;
+  *) : ;;
+  esac
 }
 
 revamped_ui_done() {

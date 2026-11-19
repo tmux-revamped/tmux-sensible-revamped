@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 REVAMPED_TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export REVAMPED_TEST_COLS=0
 
 harness_setup() {
   unset TMUX TMUX_PANE

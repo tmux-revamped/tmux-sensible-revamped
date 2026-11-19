@@ -397,6 +397,125 @@ ui_call() {
   [[ "${output}" == *"$(printf '\346\227\245\346\234\254     Z')"* ]]
 }
 
+wide_table() {
+  printf '%s' "printf 'Tool\\tState\\tDetail\\nping\\tok\\t/usr/bin/ping, measures the latency when it is on\\ntr\\tok\\t/opt/homebrew/opt/coreutils/libexec/gnubin/tr\\n' | revamped_ui_table"
+}
+
+longest_line() {
+  printf '%s\n' "$1" | awk '{ sub(/\r$/, ""); gsub(/\033\[[0-9;]*m/, ""); if (length($0) > most) { most = length($0) } } END { print most + 0 }'
+}
+
+@test "a table wider than the terminal folds its last column under itself, at a space where there is one" {
+  # Arrange
+  local call widest
+  call=$(wide_table)
+
+  # Act
+  REVAMPED_TEST_COLS=44 KODOUGU_THEME=mono run kit "${call}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${lines[0]}" == *"Tool"*"   "*"State"*"   "*"Detail"* ]]
+  [[ "${lines[1]}" == "----------------------------------------" ]]
+  [[ "${lines[2]}" == "ping   ok      /usr/bin/ping, measures  " ]]
+  [[ "${lines[3]}" == "               the latency when it is on" ]]
+  [[ "${lines[4]}" == "tr     ok      /opt/homebrew/opt/coreuti" ]]
+  [[ "${lines[5]}" == "               ls/libexec/gnubin/tr" ]]
+  [[ "${#lines[@]}" -eq 6 ]]
+  widest=$(longest_line "${output}")
+  [[ "${widest}" -eq 40 ]]
+}
+
+@test "a folded cell keeps its colour on every line" {
+  # Arrange
+  local call="printf 'Name\\tState\\nab\\t@ok:every option holds a value it knows today\\n' | revamped_ui_table"
+
+  # Act
+  REVAMPED_TEST_COLS=31 run kit "${call}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == *"38;2;80;250;123mevery option holds a"* ]]
+  [[ "${output}" == *"38;2;80;250;123mvalue it knows today"* ]]
+}
+
+@test "a folded cell breaks wide letters by screen width, never inside one" {
+  # Arrange
+  local call="printf 'Name\\tDetail\\na\\t\\346\\227\\245\\346\\227\\245\\346\\227\\245\\346\\227\\245\\346\\227\\245\\346\\234\\254\\346\\234\\254\\n' | revamped_ui_table"
+
+  # Act
+  REVAMPED_TEST_COLS=21 KODOUGU_THEME=mono run kit "${call}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${lines[2]}" == "$(printf 'a      \346\227\245\346\227\245\346\227\245\346\227\245\346\227\245')" ]]
+  [[ "${lines[3]}" == "$(printf '       \346\234\254\346\234\254')" ]]
+}
+
+@test "a terminal with fewer than ten columns for the last column leaves the table whole" {
+  # Arrange
+  local call
+  call=$(wide_table)
+
+  # Act
+  REVAMPED_TEST_COLS=28 KODOUGU_THEME=mono run kit "${call}"
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${lines[2]}" == "ping   ok      /usr/bin/ping, measures the latency when it is on" ]]
+  [[ "${#lines[@]}" -eq 4 ]]
+}
+
+@test "a table that fits and a width that is not a number leave the table whole" {
+  # Arrange
+  local call
+  call=$(wide_table)
+
+  # Act
+  REVAMPED_TEST_COLS=68 KODOUGU_THEME=mono run kit "${call}"
+  local fits="${output}"
+  REVAMPED_TEST_COLS=wide KODOUGU_THEME=mono run kit "${call}"
+
+  # Assert
+  [[ "${fits}" == "${output}" ]]
+  [[ "${lines[2]}" == "ping   ok      /usr/bin/ping, measures the latency when it is on" ]]
+  [[ "${#lines[@]}" -eq 4 ]]
+}
+
+@test "the width comes from the terminal the tool runs on" {
+  # Arrange
+  local call script="${BATS_TEST_TMPDIR}/kit.sh" shell_words widest
+  call=$(wide_table)
+  read -r -a shell_words <<<"${REVAMPED_TEST_SHELL:-sh}"
+  KODOUGU_THEME=mono run kit "${call}"
+  unset REVAMPED_TEST_COLS
+
+  # Act
+  KODOUGU_THEME=mono REVAMPED_TEST_TTY_COLS=44 run python3 "${REVAMPED_TESTS_DIR}/on_tty.py" "${shell_words[@]}" "${script}" </dev/null
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == *"               the latency when it is on"* ]]
+  widest=$(longest_line "${output}")
+  [[ "${widest}" -eq 40 ]]
+}
+
+@test "a terminal that reports no size leaves the table whole" {
+  # Arrange
+  local call script="${BATS_TEST_TMPDIR}/kit.sh" shell_words
+  call=$(wide_table)
+  read -r -a shell_words <<<"${REVAMPED_TEST_SHELL:-sh}"
+  KODOUGU_THEME=mono run kit "${call}"
+  unset REVAMPED_TEST_COLS
+
+  # Act
+  KODOUGU_THEME=mono run python3 "${REVAMPED_TESTS_DIR}/on_tty.py" "${shell_words[@]}" "${script}" </dev/null
+
+  # Assert
+  [[ "${status}" -eq 0 ]]
+  [[ "${output}" == *"ping   ok      /usr/bin/ping, measures the latency when it is on"* ]]
+}
+
 @test "the closing sentence, chips, danger box and summary carry their text" {
   # Arrange
   local call='revamped_ui_done Finished; revamped_ui_chip state; revamped_ui_danger Careful detail; revamped_ui_summary "Disk:" one "" two'
