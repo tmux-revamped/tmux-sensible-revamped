@@ -44,6 +44,7 @@ revamped_doctor_flavor() {
   *uutils*) revamped_doctor_flavor_name=uutils ;;
   *BusyBox*) revamped_doctor_flavor_name=busybox ;;
   *"This is not GNU"*) revamped_doctor_flavor_name=busybox revamped_doctor_flavor_number="" ;;
+  *"BSD grep"*) revamped_doctor_flavor_name=bsd revamped_doctor_flavor_number=$(revamped_doctor_version "${revamped_doctor_flavor_text%-FreeBSD}") ;;
   *GNU* | *"(coreutils)"* | *"(diffutils)"*) revamped_doctor_flavor_name=gnu ;;
   *mawk*) revamped_doctor_flavor_name=mawk ;;
   *"awk version"* | *"(Darwin)"*) revamped_doctor_flavor_name=bsd ;;

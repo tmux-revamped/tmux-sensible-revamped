@@ -89,6 +89,17 @@ flavor() {
   [[ "${output}" == "bsd 20200816" ]]
 }
 
+@test "doctor - the grep of macOS, which calls itself GNU compatible, reads as bsd with its version" {
+  # Arrange
+  local text="grep (BSD grep, GNU compatible) 2.6.0-FreeBSD"
+
+  # Act
+  flavor plain "${text}"
+
+  # Assert
+  [[ "${output}" == "bsd 2.6.0" ]]
+}
+
 @test "doctor - a silent tool under a cargo folder reads as uutils" {
   # Arrange
   local text=""
