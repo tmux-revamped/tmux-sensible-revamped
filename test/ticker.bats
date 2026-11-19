@@ -6,6 +6,7 @@ source "${BATS_TEST_DIRNAME:-.}/helpers.bash"
 
 setup() {
   harness_setup
+  REAL_SLEEP="$(command -v sleep)"
   stub_command sleep
   TICK_LOG="${BATS_TEST_TMPDIR}/ticks"
   export TICK_LOG
@@ -32,11 +33,12 @@ tick_snippet() {
 }
 
 wait_for_file() {
-  local tries=0
-  while [[ ! -s "$1" ]] && [[ "${tries}" -lt 200 ]]; do
-    sleep 0.01
-    tries=$((tries + 1))
+  local delay
+  for delay in 0.01 0.02 0.05 0.1 0.1 0.2 0.2 0.5 0.5 1 1 1 2 2 2 2 2 2; do
+    [[ -s "$1" ]] && return 0
+    "${REAL_SLEEP}" "${delay}"
   done
+  [[ -s "$1" ]]
 }
 
 @test "ticker.sh - run claims ownership for its pid" {

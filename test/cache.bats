@@ -18,13 +18,14 @@ store() {
 }
 
 wait_until_stored() {
-  local tries=0 value
-  value="$(stored "$1")"
-  while [[ "${value}" != "$2" ]] && [[ "${tries}" -lt 200 ]]; do
-    sleep 0.01
-    tries=$((tries + 1))
+  local delay value
+  for delay in 0.01 0.02 0.05 0.1 0.1 0.2 0.2 0.5 0.5 1 1 1 2 2 2 2 2 2; do
     value="$(stored "$1")"
+    [[ "${value}" == "$2" ]] && return 0
+    sleep "${delay}"
   done
+  value="$(stored "$1")"
+  [[ "${value}" == "$2" ]]
 }
 
 @test "cache.sh - get is empty for an unset key" {
