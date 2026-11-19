@@ -5,6 +5,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 SCREENS_REPO=$(cd "${here}/.." && pwd)
 export SCREENS_REPO
 socket=revamped-screens
+limit=1200
 
 system=$(uname -s)
 if [ "${system}" != Darwin ]; then
@@ -26,7 +27,19 @@ for tape in *.tape; do
   sh ./prepare.sh
   tmux -L "${socket}" -f "${here}/tmux.conf" new-session -d -s demo -x 120 -y 30 \
     "bash --noprofile --rcfile '${here}/setup.sh'"
-  if ! vhs "${tape}" >/dev/null 2>&1; then
+  vhs "${tape}" >/dev/null 2>&1 &
+  recorder=$!
+  waited=0
+  while kill -0 "${recorder}" 2>/dev/null; do
+    if [ "${waited}" -ge "${limit}" ]; then
+      printf 'screens: %s ran for %s seconds and was stopped.\n' "${tape}" "${limit}" >&2
+      kill "${recorder}" 2>/dev/null || :
+      break
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  if ! wait "${recorder}" 2>/dev/null; then
     printf 'screens: %s did not record.\n' "${tape}" >&2
     status=1
   fi
